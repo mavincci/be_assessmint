@@ -34,7 +34,7 @@ public class AppErrorHandler {
 
    @ExceptionHandler(value = {ExpiredJwtException.class})
    public ResponseEntity<APIResponse<Object>> handleExpiredJwtException(ExpiredJwtException e) {
-      throw new NotAuthorizedException("Your token has been expired");
+      throw new NotAuthorizedException("TOKEN_IS_EXPIRED");
    }
 
    @ExceptionHandler(value = BadCredentialsException.class)
@@ -68,7 +68,7 @@ public class AppErrorHandler {
    public ResponseEntity<APIResponse<Object>> handleInsufficientAuthenticationException(InsufficientAuthenticationException e) {
       return APIResponse.build(
             HttpStatus.FORBIDDEN.value(),
-            "Not authorized",
+            "NOT_AUTHORIZED",
             null
       );
    }
@@ -86,7 +86,7 @@ public class AppErrorHandler {
    public ResponseEntity<APIResponse<Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
       return APIResponse.build(
             HttpStatus.BAD_REQUEST.value(),
-            "Required request body is missing",
+            "REQUIRED_REQUEST_BODY_MISSING",
             null
       );
    }
@@ -187,7 +187,7 @@ public class AppErrorHandler {
 
       return APIResponse.build(
             HttpStatus.BAD_REQUEST.value(),
-            "Validation error",
+            "VALIDATION_ERROR",
             errors
       );
    }
@@ -203,7 +203,7 @@ public class AppErrorHandler {
 
       return APIResponse.build(
             HttpStatus.BAD_REQUEST.value(),
-            "Validation error",
+            "VALIDATION_ERROR",
             errors
       );
    }
