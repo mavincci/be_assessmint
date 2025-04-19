@@ -10,6 +10,7 @@ import com.assessmint.be.auth.services.dtos.authUser.AuthUserDTO;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -79,6 +80,11 @@ public class AuthService {
       return AuthUserDTO.fromEntity(saved);
    }
 
+   public AuthUserDTO registerAdmin(@Valid RegisterRequestDTO requestDto) {
+      final var saved = _registerAuthUser(requestDto, AuthRole.ADMIN);
+
+      return AuthUserDTO.fromEntity(saved);
+   }
 
    public LoginResponseDTO login(LoginRequestDTO requestDto) {
       authenticationManager.authenticate(
@@ -160,4 +166,5 @@ public class AuthService {
 
       return AuthUserDTO.fromEntity(saved.getAuthUser());
    }
+
 }

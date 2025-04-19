@@ -13,6 +13,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -22,73 +23,83 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/auth")
 @Tags(value = {
-      @Tag(name = "Auth", description = "Auth API")
+        @Tag(name = "Auth", description = "Auth API")
 })
 @RequiredArgsConstructor
 public class AppAuthController {
 
-   private final AuthService authService;
-   private final AuthUserService authUserService;
+    private final AuthService authService;
+    private final AuthUserService authUserService;
 
+    @PostMapping("/signup")
+    public ResponseEntity<APIResponse<AuthUserDTO>> register(
+            @Valid @RequestBody RegisterRequestDTO request) {
+        return APIResponse.build(
+                201,
+                "USER_SIGNUP_SUCCESS",
+                authService.register(request)
+        );
+    }
 
-   @PostMapping("/signup")
-   public ResponseEntity<APIResponse<AuthUserDTO>> register(
-         @Valid @RequestBody RegisterRequestDTO request) {
-      return APIResponse.build(
-            201,
-            "USER_SIGNUP_SUCCESS",
-            authService.register(request)
-      );
-   }
+    @PostMapping("/signup_admin")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<APIResponse<AuthUserDTO>> registerAdmin(
+            @Valid @RequestBody RegisterRequestDTO request) {
+        return APIResponse.build(
+                201,
+                "ADMIN_SIGNUP_SUCCESS",
+                authService.registerAdmin(request)
+        );
+    }
 
-   @PostMapping("/signin")
-   public ResponseEntity<APIResponse<LoginResponseDTO>> login(
-         @Valid @RequestBody LoginRequestDTO request) {
+    @PostMapping("/signin")
+    public ResponseEntity<APIResponse<LoginResponseDTO>> login(
+            @Valid @RequestBody LoginRequestDTO request) {
 
-      return APIResponse.build(
-            200,
-            "USER_SIGNIN_SUCCESS",
-            authService.login(request)
-      );
-   }
+        return APIResponse.build(
+                200,
+                "USER_SIGNIN_SUCCESS",
+                authService.login(request)
+        );
+    }
 
-   @PostMapping("/create_password/{password_token}")
-   public ResponseEntity<APIResponse<Object>> createPassword(
-         @Validated @ValidUUID @PathVariable("password_token") String passwordTokenId,
-         @Valid @RequestBody CreatePasswordDTO request) {
-      return APIResponse.build(
-            HttpStatus.CREATED.value(),
-            "PASSWORD_CREATE__SUCCESS",
-            authService.createPassword(
-                  UUID.fromString(passwordTokenId),
-                  request
-            )
-      );
-   }
+    @PostMapping("/create_password/{password_token}")
+    public ResponseEntity<APIResponse<Object>> createPassword(
+            @Validated @ValidUUID @PathVariable("password_token") String passwordTokenId,
+            @Valid @RequestBody CreatePasswordDTO request) {
+        return APIResponse.build(
+                HttpStatus.CREATED.value(),
+                "PASSWORD_CREATE__SUCCESS",
+                authService.createPassword(
+                        UUID.fromString(passwordTokenId),
+                        request
+                )
+        );
+    }
 
-   @PostMapping("/refresh")
-   public ResponseEntity<APIResponse<LoginResponseDTO>> refreshToken(
-         @AuthenticationPrincipal AuthUser authUser,
-         @RequestHeader("Authorization") String authzn
-   ) {
-      final var jwtToken = authzn.substring(7);
+    @PostMapping("/refresh")
+    public ResponseEntity<APIResponse<LoginResponseDTO>> refreshToken(
+            @AuthenticationPrincipal AuthUser authUser,
+            @RequestHeader("Authorization") String authzn
+    ) {
+        final var jwtToken = authzn.substring(7);
 
-      return APIResponse.build(
-            200,
-            "AUTH_TOKEN_REFRESH_SUCCESS",
-            authService.refreshToken(authUser, jwtToken)
-      );
-   }
+        return APIResponse.build(
+                200,
+                "AUTH_TOKEN_REFRESH_SUCCESS",
+                authService.refreshToken(authUser, jwtToken)
+        );
+    }
 
-   @PostMapping("/change_password")
-   public ResponseEntity<APIResponse<Object>> changePassword(
-         @AuthenticationPrincipal AuthUser user,
-         @Valid @RequestBody ChangePasswordRequestDTO request) {
-      authService.changePassword(user, request);
-      return APIResponse.build(
-            HttpStatus.OK.value(),
-            "PASSWORD_CHANGE_SUCCESS",
-            null
-      );
-   }
+    @PostMapping("/change_password")
+    public ResponseEntity<APIResponse<Object>> changePassword(
+            @AuthenticationPrincipal AuthUser user,
+            @Valid @RequestBody ChangePasswordRequestDTO request) {
+        authService.changePassword(user, request);
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "PASSWORD_CHANGE_SUCCESS",
+                null
+        );
+    }
 }
