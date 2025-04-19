@@ -1,0 +1,28 @@
+spring:
+  config:
+    activate:
+      on-profile: local_mav
+  application:
+    name: AssessMint BE(mav_local)
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:3332/db_pg_geb_cap?currentSchema=assessmint
+    username: usr_pg_geb_cap
+    password: pass_pg_geb_cap
+    driver-class-name: org.postgresql.Driver
+
+logging:
+  level:
+    #    root: debug
+    root: info
+
+springdoc:
+  api-docs:
+    path: /api-doc
+  swagger-ui:
+    path: /api-doc.html

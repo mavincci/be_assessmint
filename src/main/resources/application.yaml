@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: AssessMint BE
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+
+  datasource:
+    url: jdbc:postgresql://localhost:3332/db_pg_geb_cap?currentSchema=assessmint
+    username: usr_pg_geb_cap
+    password: pass_pg_geb_cap
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 3380
+
+springdoc:
+  api-docs:
+    path: /api-doc
+  swagger-ui:
+    path: /api-doc.html

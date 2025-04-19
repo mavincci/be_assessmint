@@ -1,0 +1,11 @@
+package com.assessmint.be.global.exceptions;
+
+public class NotAuthorizedException extends RuntimeException {
+   public NotAuthorizedException() {
+      super();
+   }
+
+   public NotAuthorizedException(String message) {
+      super(message);
+   }
+}
