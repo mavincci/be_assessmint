@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -38,7 +39,10 @@ public class Assessment {
     private AuthUser owner;
 
     @OneToMany
-    private List<AssessmentSection> sections;
+    @JoinColumn(name = "assessment_id")
+    @Builder.Default
+    @Cascade(org.hibernate.annotations.CascadeType.ALL)
+    private List<AssessmentSection> sections = List.of();
 
     @PrePersist
     protected void onCreate() {

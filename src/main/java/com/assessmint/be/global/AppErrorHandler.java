@@ -168,7 +168,7 @@ public class AppErrorHandler {
 
       return APIResponse.build(
             HttpStatus.BAD_REQUEST.value(),
-            "Validation error",
+            "VALIDATION_ERROR",
             errors
       );
    }
