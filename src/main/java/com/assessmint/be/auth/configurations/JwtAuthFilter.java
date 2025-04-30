@@ -2,6 +2,7 @@ package com.assessmint.be.auth.configurations;
 
 import com.assessmint.be.auth.services.AuthUserDetailService;
 import com.assessmint.be.auth.services.JwtUtils;
+import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -38,7 +39,19 @@ public class JwtAuthFilter extends OncePerRequestFilter {
       }
 
       final var jwtToken = authHeader.substring(7);
-      final var userEmail = jwtUtils.extractUsername(jwtToken);
+
+      String userEmail;
+
+      try {
+         userEmail = jwtUtils.extractUsername(jwtToken);
+      } catch (ExpiredJwtException e) {
+         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         response.setContentType("application/json");
+         response.getWriter().write("{\"statusCode\": 401, \"message\": \"AUTH_TOKEN_EXPIRED\"}");
+         response.getWriter().flush();
+         response.getWriter().close();
+         return;
+      }
 
       if (!userEmail.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
          final var userDetails = authUserDetailService.loadUserByUsername(userEmail);
