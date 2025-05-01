@@ -79,6 +79,20 @@ public class AuthService {
         return AuthUserDTO.fromEntity(saved);
     }
 
+    public AuthUserDTO signupAsExaminee(RegisterRequestDTO requestDto) {
+
+        final var saved = _registerAuthUser(requestDto, AuthRole.EXAMINEE);
+
+        return AuthUserDTO.fromEntity(saved);
+    }
+
+    public AuthUserDTO signupAsExaminer(RegisterRequestDTO requestDto) {
+
+        final var saved = _registerAuthUser(requestDto, AuthRole.EXAMINER);
+
+        return AuthUserDTO.fromEntity(saved);
+    }
+
     public AuthUserDTO registerAdmin(@Valid RegisterRequestDTO requestDto) {
         final var saved = _registerAuthUser(requestDto, AuthRole.ADMIN);
 

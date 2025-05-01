@@ -31,13 +31,33 @@ public class AppAuthController {
     private final AuthService authService;
     private final AuthUserService authUserService;
 
-    @PostMapping("/signup")
-    public ResponseEntity<APIResponse<AuthUserDTO>> register(
+//    @PostMapping("/signup")
+//    public ResponseEntity<APIResponse<AuthUserDTO>> register(
+//            @Valid @RequestBody RegisterRequestDTO request) {
+//        return APIResponse.build(
+//                201,
+//                "USER_SIGNUP_SUCCESS",
+//                authService.register(request)
+//        );
+//    }
+
+    @PostMapping("/signup_as_examinee")
+    public ResponseEntity<APIResponse<AuthUserDTO>> signupAsExaminee(
             @Valid @RequestBody RegisterRequestDTO request) {
         return APIResponse.build(
                 201,
-                "USER_SIGNUP_SUCCESS",
-                authService.register(request)
+                "EXAMINEE_SIGNUP_SUCCESS",
+                authService.signupAsExaminee(request)
+        );
+    }
+
+    @PostMapping("/signup_as_examiner")
+    public ResponseEntity<APIResponse<AuthUserDTO>> signupAsExaminer(
+            @Valid @RequestBody RegisterRequestDTO request) {
+        return APIResponse.build(
+                201,
+                "EXAMINER_SIGNUP_SUCCESS",
+                authService.signupAsExaminer(request)
         );
     }
 

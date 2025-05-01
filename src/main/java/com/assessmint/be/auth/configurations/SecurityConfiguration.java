@@ -51,6 +51,8 @@ public class SecurityConfiguration {
                         .requestMatchers(
                               "/auth/signup",
                               "/auth/signin",
+                              "/auth/signup_as_examiner",
+                              "/auth/signup_as_examinee",
                               "/auth/create_password/*"
                         ).permitAll()
                         .requestMatchers("/api/auth/*").authenticated()

@@ -11,7 +11,7 @@ public record AuthUserDTO(
         String email,
         String firstName,
         String lastName,
-        List<AuthRole> role
+        List<AuthRole> roles
 ) {
     public static AuthUserDTO fromEntity(AuthUser authUser) {
         return new AuthUserDTO(
