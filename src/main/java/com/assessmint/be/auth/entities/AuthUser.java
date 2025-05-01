@@ -8,9 +8,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 
 @Entity(name = "auth_auth_user")
 @Builder
@@ -19,75 +17,78 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class AuthUser extends Auditable implements UserDetails {
-   @Id
-   @GeneratedValue(strategy = GenerationType.UUID)
-   private UUID id;
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
 
-   @Column(nullable = false, unique = true)
-   private String email;
+    @Column(nullable = false, unique = true)
+    private String email;
 
-   @Column
-   private String password;
+    @Column
+    private String password;
 
-   @Column
-   private String firstName;
+    @Column
+    private String firstName;
 
-   @Column
-   private String middleName;
+    @Column
+    private String lastName;
 
-   @Column
-   private String lastName;
+    @Builder.Default
+    @ElementCollection(fetch = FetchType.EAGER)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "role")
+    private Set<AuthRole> roles = new HashSet<>(Collections.singleton(AuthRole.USER));
 
-   @Builder.Default
-   @Enumerated(EnumType.STRING)
-   private AuthRole role = AuthRole.USER;
 
-   @OneToMany
-   private List<PasswordToken> passwordTokens;
+    @OneToMany
+    private List<PasswordToken> passwordTokens;
 
-   public AuthUser(String email, String password, String firstName, String middleName, String lastName, AuthRole role) {
-      this.email = email;
-      this.password = password;
-      this.firstName = firstName;
-      this.middleName = middleName;
-      this.lastName = lastName;
-      this.role = role;
-   }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return roles.stream()
+                .map(role -> new SimpleGrantedAuthority("ROLE_" + role.value))
+                .toList();
+    }
 
-   @Override
-   public Collection<? extends GrantedAuthority> getAuthorities() {
-      return List.of(
-            new SimpleGrantedAuthority("ROLE_" + role.value)
-      );
-   }
+    public void addRole(AuthRole role) {
+        roles.add(role);
+    }
 
-   @Override
-   public String getPassword() {
-      return password;
-   }
+    public void removeRole(AuthRole role) {
+        roles.remove(role);
+    }
 
-   @Override
-   public String getUsername() {
-      return email;
-   }
+    public boolean hasRole(AuthRole role) {
+        return roles.contains(role);
+    }
 
-   @Override
-   public boolean isAccountNonExpired() {
-      return true;
-   }
+    @Override
+    public String getPassword() {
+        return password;
+    }
 
-   @Override
-   public boolean isAccountNonLocked() {
-      return true;
-   }
+    @Override
+    public String getUsername() {
+        return email;
+    }
 
-   @Override
-   public boolean isCredentialsNonExpired() {
-      return true;
-   }
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
 
-   @Override
-   public boolean isEnabled() {
-      return true;
-   }
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
 }

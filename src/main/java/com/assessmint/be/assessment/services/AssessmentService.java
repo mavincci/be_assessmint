@@ -48,7 +48,7 @@ public class AssessmentService {
     public SAssessmentDTO getAssessmentById(UUID id, AuthUser user) {
         final var _assessment = _getAssessmentById(id);
 
-        if (user.getRole() == AuthRole.ADMIN)
+        if (user.hasRole(AuthRole.ADMIN))
             return SAssessmentDTO.fromEntity(_assessment);
 
         if (!_assessment.getOwner().getId().equals(user.getId()))

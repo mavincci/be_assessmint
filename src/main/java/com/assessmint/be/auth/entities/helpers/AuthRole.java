@@ -8,6 +8,8 @@ import java.util.Arrays;
 
 public enum AuthRole {
    ADMIN("ADMIN"),
+   EXAMINER("EXAMINER"),
+   EXAMINEE("EXAMINEE"),
    USER("USER");
 
    @JsonValue

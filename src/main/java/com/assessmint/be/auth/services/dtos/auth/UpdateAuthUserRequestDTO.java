@@ -15,7 +15,6 @@ public record UpdateAuthUserRequestDTO(
 ) {
    public AuthUser updateEntity(AuthUser entity) {
       if (this.firstName() != null) entity.setFirstName(this.firstName());
-      if (this.middleName() != null) entity.setMiddleName(this.middleName());
       if (this.lastName() != null) entity.setLastName(this.lastName());
       return entity;
    }

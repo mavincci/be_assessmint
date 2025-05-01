@@ -25,146 +25,145 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
 
-   private final AuthUserService authUserService;
-   private final AuthUserRepository authUserRepository;
+    private final AuthUserService authUserService;
+    private final AuthUserRepository authUserRepository;
 
-   private final PasswordTokenRepository passwordTokenRepository;
+    private final PasswordTokenRepository passwordTokenRepository;
 
-   private final JwtUtils jwtUtils;
-   private final PasswordEncoder passwordEncoder;
+    private final JwtUtils jwtUtils;
+    private final PasswordEncoder passwordEncoder;
 
-   private final AuthenticationManager authenticationManager;
+    private final AuthenticationManager authenticationManager;
 
-   public AuthUser _registerAuthUserNoPwd(RegisterRequestNoPwdDTO requestDto, AuthRole authRole) {
-      try {
-         authUserService._getAnyUserByEmail(requestDto.email.toLowerCase());
-         throw new ConflictException("EMAIL_ALREADY_EXISTS");
-      } catch (NotFoundException ignored) {
-      }
+    public AuthUser _registerAuthUserNoPwd(RegisterRequestNoPwdDTO requestDto, AuthRole authRole) {
+        try {
+            authUserService._getAnyUserByEmail(requestDto.email.toLowerCase());
+            throw new ConflictException("EMAIL_ALREADY_EXISTS");
+        } catch (NotFoundException ignored) {
+        }
 
-      final var tempUser = new AuthUser(
-            requestDto.email.toLowerCase(),
-            "",
-            requestDto.firstName,
-            requestDto.middleName,
-            requestDto.lastName,
-            authRole
-      );
+        final var tempUser = AuthUser.builder()
+                .firstName(requestDto.firstName.trim().toLowerCase())
+                .lastName(requestDto.lastName.trim().toLowerCase())
+                .email(requestDto.email.trim().toLowerCase())
+                .build();
 
-      return authUserRepository.save(tempUser);
-   }
+        tempUser.addRole(authRole);
 
-   public AuthUser _registerAuthUser(RegisterRequestDTO requestDto, AuthRole authRole) {
-      try {
-         authUserService._getAnyUserByEmail(requestDto.email.toLowerCase());
-         throw new ConflictException("EMAIL_ALREADY_EXISTS");
-      } catch (NotFoundException ignored) {
-      }
+        return authUserRepository.save(tempUser);
+    }
 
-      final var tempUser = new AuthUser(
-            requestDto.email.trim().toLowerCase(),
-            passwordEncoder.encode(requestDto.password),
-            requestDto.firstName.trim().toLowerCase(),
-            requestDto.middleName.trim().toLowerCase(),
-            requestDto.lastName.trim().toLowerCase(),
-            authRole
-      );
+    public AuthUser _registerAuthUser(RegisterRequestDTO requestDto, AuthRole authRole) {
+        try {
+            authUserService._getAnyUserByEmail(requestDto.email.toLowerCase());
+            throw new ConflictException("EMAIL_ALREADY_EXISTS");
+        } catch (NotFoundException ignored) {
+        }
 
-      return authUserRepository.save(tempUser);
-   }
+        final var tempUser = AuthUser.builder()
+                .firstName(requestDto.firstName.trim().toLowerCase())
+                .lastName(requestDto.lastName.trim().toLowerCase())
+                .email(requestDto.email.trim().toLowerCase())
+                .password(passwordEncoder.encode(requestDto.password))
+                .build();
 
-   public AuthUserDTO register(RegisterRequestDTO requestDto) {
+        tempUser.addRole(authRole);
 
-      final var saved = _registerAuthUser(requestDto, AuthRole.USER);
+        return authUserRepository.save(tempUser);
+    }
 
-      return AuthUserDTO.fromEntity(saved);
-   }
+    public AuthUserDTO register(RegisterRequestDTO requestDto) {
 
-   public AuthUserDTO registerAdmin(@Valid RegisterRequestDTO requestDto) {
-      final var saved = _registerAuthUser(requestDto, AuthRole.ADMIN);
+        final var saved = _registerAuthUser(requestDto, AuthRole.USER);
 
-      return AuthUserDTO.fromEntity(saved);
-   }
+        return AuthUserDTO.fromEntity(saved);
+    }
 
-   public LoginResponseDTO login(LoginRequestDTO requestDto) {
-      authenticationManager.authenticate(
-            new UsernamePasswordAuthenticationToken(
-                  requestDto.email().toLowerCase(), requestDto.password()));
+    public AuthUserDTO registerAdmin(@Valid RegisterRequestDTO requestDto) {
+        final var saved = _registerAuthUser(requestDto, AuthRole.ADMIN);
 
-      final var authUser = authUserService._getAuthUserByEmailNotDeleted(requestDto.email());
+        return AuthUserDTO.fromEntity(saved);
+    }
 
-      final var token = jwtUtils.generateToken(authUser);
-      final var refreshToken = jwtUtils.generateRefreshToken(new HashMap<>(), authUser);
+    public LoginResponseDTO login(LoginRequestDTO requestDto) {
+        authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(
+                        requestDto.email().toLowerCase(), requestDto.password()));
 
-      return new LoginResponseDTO(
-            token,
-            refreshToken,
-            AuthUserDTO.fromEntity(authUser)
-      );
-   }
+        final var authUser = authUserService._getAuthUserByEmailNotDeleted(requestDto.email());
 
-   public LoginResponseDTO refreshToken(AuthUser authUser, String token) {
-      final var email = jwtUtils.extractUsername(token);
-      final var _authUser = authUserService._getAuthUserByEmailNotDeleted(email);
+        final var token = jwtUtils.generateToken(authUser);
+        final var refreshToken = jwtUtils.generateRefreshToken(new HashMap<>(), authUser);
 
-      if (!authUser.getId().equals(_authUser.getId())) {
-         throw new NotAuthorizedException("INVALID_AUTH_TOKEN");
-      }
+        return new LoginResponseDTO(
+                token,
+                refreshToken,
+                AuthUserDTO.fromEntity(authUser)
+        );
+    }
 
-      if (jwtUtils.isTokenValid(token, authUser)) {
-         final var t = jwtUtils.generateToken(authUser);
-         return new LoginResponseDTO(
-               t,
-               token,
-               AuthUserDTO.fromEntity(authUser)
-         );
-      }
-      throw new NotAuthorizedException("INVALID_AUTH_TOKEN");
-   }
+    public LoginResponseDTO refreshToken(AuthUser authUser, String token) {
+        final var email = jwtUtils.extractUsername(token);
+        final var _authUser = authUserService._getAuthUserByEmailNotDeleted(email);
 
-   public void changePassword(AuthUser authUser, ChangePasswordRequestDTO requestDto) {
+        if (!authUser.getId().equals(_authUser.getId())) {
+            throw new NotAuthorizedException("INVALID_AUTH_TOKEN");
+        }
 
-      if (passwordEncoder.matches(requestDto.oldPassword, authUser.getPassword())) {
-         authUser.setPassword(passwordEncoder.encode(requestDto.newPassword));
-         authUserRepository.save(authUser);
-         return;
-      }
-      throw new ConflictException("INVALID_OLD_PASSWORD");
-   }
+        if (jwtUtils.isTokenValid(token, authUser)) {
+            final var t = jwtUtils.generateToken(authUser);
+            return new LoginResponseDTO(
+                    t,
+                    token,
+                    AuthUserDTO.fromEntity(authUser)
+            );
+        }
+        throw new NotAuthorizedException("INVALID_AUTH_TOKEN");
+    }
 
-   public PasswordToken _createPasswordToken(AuthUser authUser) {
-      final var expiresAt = LocalDateTime.now().plusDays(3);
+    public void changePassword(AuthUser authUser, ChangePasswordRequestDTO requestDto) {
 
-      final var pwdToken = new PasswordToken(authUser, expiresAt);
+        if (passwordEncoder.matches(requestDto.oldPassword, authUser.getPassword())) {
+            authUser.setPassword(passwordEncoder.encode(requestDto.newPassword));
+            authUserRepository.save(authUser);
+            return;
+        }
+        throw new ConflictException("INVALID_OLD_PASSWORD");
+    }
 
-      return passwordTokenRepository.save(pwdToken);
-   }
+    public PasswordToken _createPasswordToken(AuthUser authUser) {
+        final var expiresAt = LocalDateTime.now().plusDays(3);
 
-   public AuthUserDTO createPassword(UUID passwordToken, CreatePasswordDTO request) {
-      final var pwdToken = passwordTokenRepository.findById(passwordToken)
-            .orElseThrow(() -> new NotFoundException("Password token not found"));
+        final var pwdToken = new PasswordToken(authUser, expiresAt);
 
-      final var now = LocalDateTime.now();
+        return passwordTokenRepository.save(pwdToken);
+    }
 
-      if (pwdToken.getIsRedeemed())
-         throw new ConflictException("Password token has already been used");
+    public AuthUserDTO createPassword(UUID passwordToken, CreatePasswordDTO request) {
+        final var pwdToken = passwordTokenRepository.findById(passwordToken)
+                .orElseThrow(() -> new NotFoundException("Password token not found"));
 
-      if (pwdToken.getExpiresAt().isBefore(now))
-         throw new ConflictException("Password token has expired");
+        final var now = LocalDateTime.now();
 
-      final var pwd = passwordEncoder.encode(request.password());
+        if (pwdToken.getIsRedeemed())
+            throw new ConflictException("Password token has already been used");
 
-      final var usr = pwdToken.getAuthUser();
+        if (pwdToken.getExpiresAt().isBefore(now))
+            throw new ConflictException("Password token has expired");
 
-      usr.setPassword(pwd);
+        final var pwd = passwordEncoder.encode(request.password());
 
-      pwdToken.setIsRedeemed(true);
-      pwdToken.setRedeemedAt(now);
-      pwdToken.setAuthUser(usr);
+        final var usr = pwdToken.getAuthUser();
 
-      final var saved = passwordTokenRepository.save(pwdToken);
+        usr.setPassword(pwd);
 
-      return AuthUserDTO.fromEntity(saved.getAuthUser());
-   }
+        pwdToken.setIsRedeemed(true);
+        pwdToken.setRedeemedAt(now);
+        pwdToken.setAuthUser(usr);
+
+        final var saved = passwordTokenRepository.save(pwdToken);
+
+        return AuthUserDTO.fromEntity(saved.getAuthUser());
+    }
 
 }
