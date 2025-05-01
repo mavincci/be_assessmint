@@ -6,15 +6,11 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 @Data
-public class RegisterRequestDTO {
+public class SignupDTO {
 
    @NotNull(message = "First name is required")
    @NotEmpty(message = "First name is required")
    public final String firstName;
-
-   @NotEmpty(message = "Middle name is required")
-   @NotNull(message = "Middle name is required")
-   public final String middleName;
 
    @NotNull(message = "Last name is required")
    @NotEmpty(message = "Last name is required")

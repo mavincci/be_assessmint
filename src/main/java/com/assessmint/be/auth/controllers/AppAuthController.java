@@ -43,7 +43,7 @@ public class AppAuthController {
 
     @PostMapping("/signup_as_examinee")
     public ResponseEntity<APIResponse<AuthUserDTO>> signupAsExaminee(
-            @Valid @RequestBody RegisterRequestDTO request) {
+            @Valid @RequestBody SignupDTO request) {
         return APIResponse.build(
                 201,
                 "EXAMINEE_SIGNUP_SUCCESS",
@@ -53,7 +53,7 @@ public class AppAuthController {
 
     @PostMapping("/signup_as_examiner")
     public ResponseEntity<APIResponse<AuthUserDTO>> signupAsExaminer(
-            @Valid @RequestBody RegisterRequestDTO request) {
+            @Valid @RequestBody SignupDTO request) {
         return APIResponse.build(
                 201,
                 "EXAMINER_SIGNUP_SUCCESS",
@@ -64,7 +64,7 @@ public class AppAuthController {
     @PostMapping("/signup_admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<APIResponse<AuthUserDTO>> registerAdmin(
-            @Valid @RequestBody RegisterRequestDTO request) {
+            @Valid @RequestBody SignupDTO request) {
         return APIResponse.build(
                 201,
                 "ADMIN_SIGNUP_SUCCESS",

@@ -53,7 +53,7 @@ public class AuthService {
         return authUserRepository.save(tempUser);
     }
 
-    public AuthUser _registerAuthUser(RegisterRequestDTO requestDto, AuthRole authRole) {
+    public AuthUser _registerAuthUser(SignupDTO requestDto, AuthRole authRole) {
         try {
             authUserService._getAnyUserByEmail(requestDto.email.toLowerCase());
             throw new ConflictException("EMAIL_ALREADY_EXISTS");
@@ -72,28 +72,28 @@ public class AuthService {
         return authUserRepository.save(tempUser);
     }
 
-    public AuthUserDTO register(RegisterRequestDTO requestDto) {
+    public AuthUserDTO register(SignupDTO requestDto) {
 
         final var saved = _registerAuthUser(requestDto, AuthRole.USER);
 
         return AuthUserDTO.fromEntity(saved);
     }
 
-    public AuthUserDTO signupAsExaminee(RegisterRequestDTO requestDto) {
+    public AuthUserDTO signupAsExaminee(SignupDTO requestDto) {
 
         final var saved = _registerAuthUser(requestDto, AuthRole.EXAMINEE);
 
         return AuthUserDTO.fromEntity(saved);
     }
 
-    public AuthUserDTO signupAsExaminer(RegisterRequestDTO requestDto) {
+    public AuthUserDTO signupAsExaminer(SignupDTO requestDto) {
 
         final var saved = _registerAuthUser(requestDto, AuthRole.EXAMINER);
 
         return AuthUserDTO.fromEntity(saved);
     }
 
-    public AuthUserDTO registerAdmin(@Valid RegisterRequestDTO requestDto) {
+    public AuthUserDTO registerAdmin(@Valid SignupDTO requestDto) {
         final var saved = _registerAuthUser(requestDto, AuthRole.ADMIN);
 
         return AuthUserDTO.fromEntity(saved);
