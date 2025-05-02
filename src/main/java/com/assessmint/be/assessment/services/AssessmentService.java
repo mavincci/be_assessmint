@@ -14,6 +14,7 @@ import com.assessmint.be.auth.entities.helpers.AuthRole;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -83,6 +84,13 @@ public class AssessmentService {
 
         return _assessment.getSections().stream()
                 .map(SAssessmentSectionDTO::fromEntity)
+                .toList();
+    }
+
+    @PreAuthorize("hasRole('EXAMINER')")
+    public List<SAssessmentDTO> getMyAssessments(AuthUser user) {
+        return assessmentRepository.findAllByOwnerId(user.getId()).stream()
+                .map(SAssessmentDTO::fromEntity)
                 .toList();
     }
 }

@@ -61,6 +61,17 @@ public class AppAuthController {
         );
     }
 
+    @GetMapping("/whoami")
+    public ResponseEntity<APIResponse<AuthUserDTO>> whoami(
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                200,
+                "YOU_ARE_AUTHENTICATED",
+                AuthUserDTO.fromEntity(user)
+        );
+    }
+
     @PostMapping("/signup_admin")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<APIResponse<AuthUserDTO>> registerAdmin(

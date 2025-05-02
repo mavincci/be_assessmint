@@ -82,4 +82,15 @@ public class AssessmentController {
                 assessmentService.getSections(UUID.fromString(id), user)
         );
     }
+
+    @GetMapping("/mine")
+    public ResponseEntity<APIResponse<List<SAssessmentDTO>>> getMyAssessments(
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENTS_GET_SUCCESS",
+                assessmentService.getMyAssessments(user)
+        );
+    }
 }
