@@ -1,19 +1,20 @@
 package com.assessmint.be.assessment.dtos.question;
 
 import com.assessmint.be.assessment.entities.Question;
+import com.assessmint.be.assessment.helpers.QuestionType;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.Setter;
 
+import java.util.Map;
 import java.util.UUID;
 
+@Setter
 @Getter
-@AllArgsConstructor
-public class QuestionDTO<T> {
+public abstract class QuestionDTO {
     private UUID id;
 
-    public static QuestionDTO fromEntity(Question entity) {
-        return new QuestionDTO(
-                entity.getId()
-        );
-    }
+    public abstract QuestionType getQuestionType();
+
+    public abstract Map<String, Object> getQuestionData();
 }

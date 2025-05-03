@@ -6,6 +6,7 @@ import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSect
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
+import com.assessmint.be.assessment.dtos.question.TrueFalseQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.add_question.AddTrueFalseQuestionDTO;
 import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.assessment.entities.AssessmentSection;
@@ -131,6 +132,6 @@ public class AssessmentService {
 
         final var saved = trueFalseQuestionRepository.save(tempQuestion);
 
-        return QuestionDTO.fromEntity(saved);
+        return TrueFalseQuestionDTO.fromEntity(saved);
     }
 }
