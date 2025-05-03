@@ -4,6 +4,8 @@ import com.assessmint.be.assessment.dtos.assessment.CreateAssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
+import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.QuestionDTO;
 import com.assessmint.be.assessment.services.AssessmentService;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.controllers.dtos.APIResponse;
@@ -91,6 +93,18 @@ public class AssessmentController {
                 HttpStatus.OK.value(),
                 "ASSESSMENTS_GET_SUCCESS",
                 assessmentService.getMyAssessments(user)
+        );
+    }
+
+    @PostMapping("/add_question")
+    public ResponseEntity<APIResponse<QuestionDTO>> addQuestion(
+            @Valid @RequestBody AddQuestionDTO reqDto,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.CREATED.value(),
+                "ASSESSMENT_QUESTION_ADD_SUCCESS",
+                assessmentService.addQuestion(reqDto, user)
         );
     }
 }
