@@ -4,10 +4,7 @@ import com.assessmint.be.auth.entities.AuthUser;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.GenerationType;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDateTime;
@@ -16,6 +13,7 @@ import java.util.Objects;
 import java.util.UUID;
 
 @Entity
+@Setter
 @Getter
 @Builder
 @NoArgsConstructor
@@ -29,6 +27,16 @@ public class Assessment {
     private String title;
 
     private String description;
+
+    private LocalDateTime startDateTime;
+
+    private LocalDateTime endDateTime;
+
+    private Integer duration;
+
+    private Integer maxAttempts;
+
+    private Boolean isPublic;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

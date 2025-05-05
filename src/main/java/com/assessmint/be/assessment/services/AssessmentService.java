@@ -1,8 +1,6 @@
 package com.assessmint.be.assessment.services;
 
-import com.assessmint.be.assessment.dtos.assessment.AssessmentDTO;
-import com.assessmint.be.assessment.dtos.assessment.CreateAssessmentDTO;
-import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
+import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
@@ -19,6 +17,8 @@ import com.assessmint.be.assessment.repositories.questions.TrueFalseQuestionRepo
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.auth.entities.helpers.AuthRole;
 import com.assessmint.be.global.Utils;
+import com.assessmint.be.global.configurations.DateConstants;
+import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -26,6 +26,7 @@ import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -139,5 +140,38 @@ public class AssessmentService {
         final var _savedSection = assessmentSectionRepository.save(_section);
 
         return QuestionTrueFalseDTO.fromEntity(_savedQuestion);
+    }
+
+    public AssessmentSettingDTO updateSettings(UpdateSettingDTO reqDto, AuthUser user) {
+        final var _assessment = _getAssessmentById(UUID.fromString(reqDto.assessmentId()));
+
+        if (!_assessment.getOwner().getId().equals(user.getId()))
+            throw new NotAuthorizedException("NOT_AUTHORIZED");
+
+        final var startDateTime = LocalDateTime.parse(reqDto.startDateTime(), DateConstants.dateTimeFormatter);
+        final var endDateTime = LocalDateTime.parse(reqDto.endDateTIme(), DateConstants.dateTimeFormatter);
+
+        if (startDateTime.isBefore(LocalDateTime.now()))
+            throw new ConflictException("START_DATE_MUST_BE_IN_THE_FUTURE");
+
+        if (endDateTime.isBefore(LocalDateTime.now()))
+            throw new ConflictException("END_DATE_MUST_BE_IN_THE_FUTURE");
+
+        if (endDateTime.isBefore(startDateTime))
+            throw new ConflictException("END_DATE_MUST_BE_AFTER_START_DATE");
+
+        final var duration = Integer.parseInt(reqDto.duration());
+        final var maxAttempts = Integer.parseInt(reqDto.maxAttempts());
+        final var isPublic = Utils.parseBoolean(reqDto.isPublic());
+
+        _assessment.setStartDateTime(startDateTime);
+        _assessment.setEndDateTime(endDateTime);
+        _assessment.setDuration(duration);
+        _assessment.setMaxAttempts(maxAttempts);
+        _assessment.setIsPublic(isPublic);
+
+        final var saved = assessmentRepository.save(_assessment);
+
+        return AssessmentSettingDTO.fromEntity(saved);
     }
 }

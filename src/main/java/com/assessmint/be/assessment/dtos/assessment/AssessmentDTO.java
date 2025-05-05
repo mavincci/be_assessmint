@@ -10,7 +10,7 @@ public record AssessmentDTO(
         UUID id,
         String title,
         String description,
-
+        SAssessmentSettingDTO settings,
         List<AssessmentSectionDTO> sections
 ) {
     public static AssessmentDTO fromEntity(Assessment entity) {
@@ -18,6 +18,7 @@ public record AssessmentDTO(
                 entity.getId(),
                 entity.getTitle(),
                 entity.getDescription(),
+                SAssessmentSettingDTO.fromEntity(entity),
                 entity.getSections().stream()
                         .map(AssessmentSectionDTO::fromEntity)
                         .toList()

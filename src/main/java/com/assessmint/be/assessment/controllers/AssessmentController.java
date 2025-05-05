@@ -1,8 +1,6 @@
 package com.assessmint.be.assessment.controllers;
 
-import com.assessmint.be.assessment.dtos.assessment.AssessmentDTO;
-import com.assessmint.be.assessment.dtos.assessment.CreateAssessmentDTO;
-import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
+import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
@@ -106,6 +104,18 @@ public class AssessmentController {
                 HttpStatus.CREATED.value(),
                 "ASSESSMENT_QUESTION_ADD_SUCCESS",
                 assessmentService.addQuestion(reqDto, user)
+        );
+    }
+
+    @PostMapping("/update_settings")
+    public ResponseEntity<APIResponse<AssessmentSettingDTO>> updateSettings(
+            @Valid @RequestBody UpdateSettingDTO reqDto,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENT_SETTINGS_UPDATE_SUCCESS",
+                assessmentService.updateSettings(reqDto, user)
         );
     }
 }
