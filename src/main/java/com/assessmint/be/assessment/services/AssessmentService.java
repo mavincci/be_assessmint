@@ -1,12 +1,13 @@
 package com.assessmint.be.assessment.services;
 
+import com.assessmint.be.assessment.dtos.assessment.AssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment.CreateAssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
-import com.assessmint.be.assessment.dtos.question.TrueFalseQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.QuestionTrueFalseDTO;
 import com.assessmint.be.assessment.dtos.question.add_question.AddTrueFalseQuestionDTO;
 import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.assessment.entities.AssessmentSection;
@@ -56,16 +57,16 @@ public class AssessmentService {
                 .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_FOUND"));
     }
 
-    public SAssessmentDTO getAssessmentById(UUID id, AuthUser user) {
+    public AssessmentDTO getAssessmentById(UUID id, AuthUser user) {
         final var _assessment = _getAssessmentById(id);
 
         if (user.hasRole(AuthRole.ADMIN))
-            return SAssessmentDTO.fromEntity(_assessment);
+            return AssessmentDTO.fromEntity(_assessment);
 
         if (!_assessment.getOwner().getId().equals(user.getId()))
             throw new NotAuthorizedException("NOT_AUTHORIZED");
 
-        return SAssessmentDTO.fromEntity(_assessment);
+        return AssessmentDTO.fromEntity(_assessment);
     }
 
     public SAssessmentSectionDTO addSection(CreateAssessmentSectionDTO reqDto, AuthUser user) {
@@ -116,12 +117,12 @@ public class AssessmentService {
             throw new NotAuthorizedException("QUESTION_TYPE_MISMATCH");
 
         return switch (_section.getQuestionType()) {
-            case TRUE_OR_FALSE -> handleTrueFalseQuestion((AddTrueFalseQuestionDTO) reqDto);
+            case TRUE_OR_FALSE -> handleTrueFalseQuestion((AddTrueFalseQuestionDTO) reqDto, _section);
             case MULTIPLE_CHOICE -> throw new NotImplementedException("MULTIPLE_CHOICE_NOT_IMPLEMENTED");
         };
     }
 
-    public QuestionDTO handleTrueFalseQuestion(AddTrueFalseQuestionDTO reqDto) {
+    public QuestionDTO handleTrueFalseQuestion(AddTrueFalseQuestionDTO reqDto, AssessmentSection _section) {
         final var answer = Utils.parseBoolean(reqDto.answer);
         String questionText = reqDto.questionText.trim();
 
@@ -130,8 +131,13 @@ public class AssessmentService {
                 .answer(answer)
                 .build();
 
-        final var saved = trueFalseQuestionRepository.save(tempQuestion);
+        tempQuestion.setSection(_section);
 
-        return TrueFalseQuestionDTO.fromEntity(saved);
+        _section.addQuestion(tempQuestion);
+
+        final var _savedQuestion = trueFalseQuestionRepository.save(tempQuestion);
+        final var _savedSection = assessmentSectionRepository.save(_section);
+
+        return QuestionTrueFalseDTO.fromEntity(_savedQuestion);
     }
 }

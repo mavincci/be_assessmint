@@ -1,8 +1,7 @@
-package com.assessmint.be.assessment.dtos.question;
+package com.assessmint.be.assessment.dtos.question.s;
 
 import com.assessmint.be.assessment.entities.Question;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
-import com.assessmint.be.assessment.helpers.QuestionType;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,16 +10,14 @@ import java.util.UUID;
 
 @Setter
 @Getter
-public abstract class QuestionDTO {
+public abstract class SQuestionDTO {
     private UUID id;
-
-    public abstract QuestionType getQuestionType();
 
     public abstract Map<String, Object> getQuestionData();
 
-    public static QuestionDTO fromEntity(Question entity) {
+    public static SQuestionDTO fromEntity(Question entity) {
         return switch (entity.getQuestionType()) {
-            case TRUE_OR_FALSE -> QuestionTrueFalseDTO.fromEntity((TrueFalseQuestion) entity);
+            case TRUE_OR_FALSE -> STrueFalseQuestionDTO.fromEntity((TrueFalseQuestion) entity);
             case MULTIPLE_CHOICE -> null;
         };
     }

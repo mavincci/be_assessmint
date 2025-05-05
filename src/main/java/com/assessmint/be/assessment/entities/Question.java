@@ -3,6 +3,7 @@ package com.assessmint.be.assessment.entities;
 import com.assessmint.be.assessment.helpers.QuestionType;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -12,6 +13,7 @@ import java.util.UUID;
 @Inheritance(strategy = InheritanceType.JOINED)
 @DiscriminatorColumn(name = "question_type", discriminatorType = DiscriminatorType.STRING)
 @Getter
+@Setter
 public abstract class Question {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
@@ -20,6 +22,9 @@ public abstract class Question {
     @Enumerated(EnumType.STRING)
     @Column(name = "question_type", insertable = false, updatable = false)
     protected QuestionType questionType;
+
+    @ManyToOne
+    protected AssessmentSection section;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

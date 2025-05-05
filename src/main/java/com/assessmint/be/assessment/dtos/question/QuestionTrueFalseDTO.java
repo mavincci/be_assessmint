@@ -7,11 +7,11 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-public class TrueFalseQuestionDTO extends QuestionDTO {
+public class QuestionTrueFalseDTO extends QuestionDTO {
     private final String questionText;
     private final boolean answer;
 
-    public TrueFalseQuestionDTO(UUID id, String questionText, boolean answer) {
+    public QuestionTrueFalseDTO(UUID id, String questionText, boolean answer) {
         this.setId(id);
         this.questionText = questionText;
         this.answer = answer;
@@ -30,8 +30,8 @@ public class TrueFalseQuestionDTO extends QuestionDTO {
         }};
     }
 
-    public static TrueFalseQuestionDTO fromEntity(TrueFalseQuestion entity) {
-        return new TrueFalseQuestionDTO(
+    public static QuestionTrueFalseDTO fromEntity(TrueFalseQuestion entity) {
+        return new QuestionTrueFalseDTO(
                 entity.getId(),
                 entity.getQuestionText(),
                 entity.isAnswer()

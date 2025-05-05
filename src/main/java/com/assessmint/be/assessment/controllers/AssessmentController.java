@@ -1,5 +1,6 @@
 package com.assessmint.be.assessment.controllers;
 
+import com.assessmint.be.assessment.dtos.assessment.AssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment.CreateAssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
@@ -46,7 +47,7 @@ public class AssessmentController {
     }
 
     @GetMapping("/get_by_id/{id}")
-    public ResponseEntity<APIResponse<SAssessmentDTO>> getAssessmentById(
+    public ResponseEntity<APIResponse<AssessmentDTO>> getAssessmentById(
             @ValidUUID(message = "INVALID_UUID_FORMAT") @PathVariable("id") String id,
             @AuthenticationPrincipal AuthUser user
     ) {

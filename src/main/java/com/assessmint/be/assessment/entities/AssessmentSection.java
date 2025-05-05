@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
 
@@ -32,6 +33,9 @@ public class AssessmentSection {
     @ManyToOne
     @JoinColumn(name = "assessment_id", nullable = false)
     private Assessment assessment;
+
+    @OneToMany
+    private List<Question> questions;
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
@@ -59,5 +63,9 @@ public class AssessmentSection {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
+    }
+
+    public void addQuestion(Question question) {
+        questions.add(question);
     }
 }
