@@ -20,6 +20,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -116,6 +117,19 @@ public class AssessmentController {
                 HttpStatus.OK.value(),
                 "ASSESSMENT_SETTINGS_UPDATE_SUCCESS",
                 assessmentService.updateSettings(reqDto, user)
+        );
+    }
+
+    @PostMapping("/publish/{assessmentId}")
+    public ResponseEntity<APIResponse<HashMap<String, Object>>> publish(
+            @ValidUUID(message = "INVALID_UUID_FORMAT")
+            @PathVariable("assessmentId") String assessmentId,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENT_PUBLISH_SUCCESS",
+                assessmentService.publish(UUID.fromString(assessmentId), user)
         );
     }
 }

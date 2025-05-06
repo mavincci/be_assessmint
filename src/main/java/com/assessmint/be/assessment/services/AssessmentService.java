@@ -27,6 +27,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -173,5 +174,26 @@ public class AssessmentService {
         final var saved = assessmentRepository.save(_assessment);
 
         return AssessmentSettingDTO.fromEntity(saved);
+    }
+
+    public HashMap<String, Object> publish(UUID uuid, AuthUser user) {
+        final var _assessment = _getAssessmentById(uuid);
+
+        if (!_assessment.getOwner().getId().equals(user.getId()))
+            throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
+
+        if (_assessment.getIsPublished() != null && _assessment.getIsPublished())
+            throw new ConflictException("ASSESSMENT_ALREADY_PUBLISHED");
+
+        _assessment.setIsPublished(true);
+        _assessment.setPublishedAt(LocalDateTime.now());
+
+        final var saved = assessmentRepository.save(_assessment);
+
+        return new HashMap<>() {{
+            put("assessmentId", saved.getId());
+            put("publishedAt", DateConstants.dateTimeFormatter.format(saved.getPublishedAt()));
+            put("isPublished", saved.getIsPublished());
+        }};
     }
 }

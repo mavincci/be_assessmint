@@ -38,6 +38,10 @@ public class Assessment {
 
     private Boolean isPublic;
 
+    private Boolean isPublished;
+
+    private LocalDateTime publishedAt;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
