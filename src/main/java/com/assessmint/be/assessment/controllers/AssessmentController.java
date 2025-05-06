@@ -3,6 +3,7 @@ package com.assessmint.be.assessment.controllers;
 import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
+import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
 import com.assessmint.be.assessment.services.AssessmentService;
@@ -131,5 +132,28 @@ public class AssessmentController {
                 "ASSESSMENT_PUBLISH_SUCCESS",
                 assessmentService.publish(UUID.fromString(assessmentId), user)
         );
+    }
+
+    @GetMapping("/get_questions/{sectionId}")
+    public ResponseEntity<APIResponse<List<QuestionDTO>>> getQuestions(
+            @ValidUUID(message = "INVALID_UUID_FORMAT")
+            @NotBlank
+            @PathVariable("sectionId") String sectionId,
+
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENT_QUESTIONS_FETCH_SUCCESS",
+                assessmentService.getQuestions(UUID.fromString(sectionId), user)
+        );
+    }
+
+    @PostMapping("/start_assessment")
+    public String startAssessment(
+            @Valid @RequestBody StartAssessmentDTO reqDto,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return assessmentService.startAssessment(reqDto, user);
     }
 }

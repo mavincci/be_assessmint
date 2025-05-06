@@ -3,6 +3,7 @@ package com.assessmint.be.assessment.services;
 import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
+import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionTrueFalseDTO;
@@ -195,5 +196,35 @@ public class AssessmentService {
             put("publishedAt", DateConstants.dateTimeFormatter.format(saved.getPublishedAt()));
             put("isPublished", saved.getIsPublished());
         }};
+    }
+
+    @PreAuthorize("hasRole('EXAMINEE')")
+    public String startAssessment(StartAssessmentDTO reqDto, AuthUser user) {
+        final var _assessment = _getAssessmentById(UUID.fromString(reqDto.assessmentId()));
+
+        if (!_assessment.getIsPublished())
+            throw new ConflictException("ASSESSMENT_NOT_PUBLISHED");
+
+        if (_assessment.getStartDateTime() != null && _assessment.getStartDateTime().isAfter(LocalDateTime.now()))
+            throw new ConflictException("ASSESSMENT_NOT_STARTED_YET");
+
+        if (_assessment.getEndDateTime() != null && _assessment.getEndDateTime().isBefore(LocalDateTime.now()))
+            throw new ConflictException("ASSESSMENT_ALREADY_ENDED");
+
+        return "Starting";
+    }
+
+    public List<QuestionDTO> getQuestions(UUID sectionId, AuthUser user) {
+        final var section = assessmentSectionRepository.findById(sectionId)
+                .orElseThrow(() -> new NotFoundException("SECTION_NOT_FOUND"));
+
+        final var _assessment = section.getAssessment();
+
+        if (!_assessment.getOwner().getId().equals(user.getId()))
+            throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
+
+        return section.getQuestions().stream()
+                .map(QuestionDTO::fromEntity)
+                .toList();
     }
 }
