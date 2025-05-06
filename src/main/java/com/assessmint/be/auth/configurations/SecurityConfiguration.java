@@ -49,6 +49,7 @@ public class SecurityConfiguration {
                   r
                         // Auth paths
                         .requestMatchers(
+                              "/auth/get_roles",
                               "/auth/signup",
                               "/auth/signin",
                               "/auth/signup_as_examiner",

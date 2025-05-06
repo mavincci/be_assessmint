@@ -1,6 +1,7 @@
 package com.assessmint.be.auth.controllers;
 
 import com.assessmint.be.auth.entities.AuthUser;
+import com.assessmint.be.auth.entities.helpers.AuthRole;
 import com.assessmint.be.auth.services.AuthService;
 import com.assessmint.be.auth.services.AuthUserService;
 import com.assessmint.be.auth.services.dtos.auth.*;
@@ -48,6 +49,15 @@ public class AppAuthController {
                 201,
                 "EXAMINEE_SIGNUP_SUCCESS",
                 authService.signupAsExaminee(request)
+        );
+    }
+
+    @GetMapping("/get_roles")
+    public ResponseEntity<APIResponse<AuthRole[]>> getRoles() {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "AUTH_ROLES_FETCH_SUCCESS",
+                AuthRole.values()
         );
     }
 
