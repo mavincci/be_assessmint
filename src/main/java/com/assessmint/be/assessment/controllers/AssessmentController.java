@@ -92,7 +92,7 @@ public class AssessmentController {
     ) {
         return APIResponse.build(
                 HttpStatus.OK.value(),
-                "ASSESSMENTS_GET_SUCCESS",
+                "ASSESSMENTS_FETCH_SUCCESS",
                 assessmentService.getMyAssessments(user)
         );
     }

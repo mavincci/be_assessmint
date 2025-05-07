@@ -78,6 +78,9 @@ public class AssessmentService {
         if (!_assessment.getOwner().getId().equals(user.getId()))
             throw new NotAuthorizedException("NOT_AUTHORIZED");
 
+        if (_assessment.getIsPublished())
+            throw new ConflictException("ASSESSMENT_ALREADY_PUBLISHED");
+
         final var _newSection = AssessmentSection.builder()
                 .title(reqDto.title())
                 .description(reqDto.description())
@@ -113,8 +116,13 @@ public class AssessmentService {
                 .findById(UUID.fromString(reqDto.sectionId))
                 .orElseThrow(() -> new NotFoundException("SECTION_NOT_FOUND"));
 
-        if (!_section.getAssessment().getOwner().getId().equals(user.getId()))
+        final var _assessment = _section.getAssessment();
+
+        if (!_assessment.getOwner().getId().equals(user.getId()))
             throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
+
+        if (_assessment.getIsPublished() != null && _assessment.getIsPublished())
+            throw new ConflictException("ASSESSMENT_ALREADY_PUBLISHED");
 
         if (_section.getQuestionType() != reqDto.getQuestionType())
             throw new NotAuthorizedException("QUESTION_TYPE_MISMATCH");
@@ -149,6 +157,9 @@ public class AssessmentService {
 
         if (!_assessment.getOwner().getId().equals(user.getId()))
             throw new NotAuthorizedException("NOT_AUTHORIZED");
+
+        if (_assessment.getIsPublished() != null && _assessment.getIsPublished())
+            throw new ConflictException("ASSESSMENT_ALREADY_PUBLISHED");
 
         final var startDateTime = LocalDateTime.parse(reqDto.startDateTime(), DateConstants.dateTimeFormatter);
         final var endDateTime = LocalDateTime.parse(reqDto.endDateTIme(), DateConstants.dateTimeFormatter);
