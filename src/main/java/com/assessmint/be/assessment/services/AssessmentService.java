@@ -3,6 +3,7 @@ package com.assessmint.be.assessment.services;
 import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
+import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
@@ -10,10 +11,12 @@ import com.assessmint.be.assessment.dtos.question.QuestionTrueFalseDTO;
 import com.assessmint.be.assessment.dtos.question.add_question.AddTrueFalseQuestionDTO;
 import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.assessment.entities.AssessmentSection;
+import com.assessmint.be.assessment.entities.Attempt;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 import com.assessmint.be.assessment.helpers.QuestionType;
 import com.assessmint.be.assessment.repositories.AssessmentRepository;
 import com.assessmint.be.assessment.repositories.AssessmentSectionRepository;
+import com.assessmint.be.assessment.repositories.AttemptRepository;
 import com.assessmint.be.assessment.repositories.questions.TrueFalseQuestionRepository;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.auth.entities.helpers.AuthRole;
@@ -37,6 +40,7 @@ import java.util.UUID;
 public class AssessmentService {
     private final AssessmentRepository assessmentRepository;
     private final AssessmentSectionRepository assessmentSectionRepository;
+    private final AttemptRepository attemptRepository;
 
     private final TrueFalseQuestionRepository trueFalseQuestionRepository;
 
@@ -210,7 +214,7 @@ public class AssessmentService {
     }
 
     @PreAuthorize("hasRole('EXAMINEE')")
-    public String startAssessment(StartAssessmentDTO reqDto, AuthUser user) {
+    public AttemptDTO startAssessment(StartAssessmentDTO reqDto, AuthUser user) {
         final var _assessment = _getAssessmentById(UUID.fromString(reqDto.assessmentId()));
 
         if (!_assessment.getIsPublished())
@@ -222,7 +226,25 @@ public class AssessmentService {
         if (_assessment.getEndDateTime() != null && _assessment.getEndDateTime().isBefore(LocalDateTime.now()))
             throw new ConflictException("ASSESSMENT_ALREADY_ENDED");
 
-        return "Starting";
+        final var maxAttempts = _assessment.getMaxAttempts();
+
+        if (maxAttempts != null && maxAttempts > 0) {
+            final var attempts = attemptRepository
+                    .findAllByAssessmentIdAndExamineeId(
+                            _assessment.getId(), user.getId());
+
+            if (attempts.size() >= maxAttempts)
+                throw new ConflictException("MAX_ATTEMPTS_REACHED");
+        }
+
+        final var _attempt = Attempt.builder()
+                .assessment(_assessment)
+                .examinee(user)
+                .build();
+
+        final var savedAttempt = attemptRepository.save(_attempt);
+
+        return AttemptDTO.fromEntity(savedAttempt);
     }
 
     public List<QuestionDTO> getQuestions(UUID sectionId, AuthUser user) {
@@ -238,4 +260,6 @@ public class AssessmentService {
                 .map(QuestionDTO::fromEntity)
                 .toList();
     }
+
+    
 }

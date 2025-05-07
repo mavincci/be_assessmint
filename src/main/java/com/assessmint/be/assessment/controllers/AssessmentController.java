@@ -3,6 +3,7 @@ package com.assessmint.be.assessment.controllers;
 import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
+import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
@@ -150,10 +151,14 @@ public class AssessmentController {
     }
 
     @PostMapping("/start_assessment")
-    public String startAssessment(
+    public ResponseEntity<APIResponse<AttemptDTO>> startAssessment(
             @Valid @RequestBody StartAssessmentDTO reqDto,
             @AuthenticationPrincipal AuthUser user
     ) {
-        return assessmentService.startAssessment(reqDto, user);
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENT_START_SUCCESS",
+                assessmentService.startAssessment(reqDto, user)
+        );
     }
 }
