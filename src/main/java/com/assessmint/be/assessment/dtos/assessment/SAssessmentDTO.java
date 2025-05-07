@@ -7,13 +7,15 @@ import java.util.UUID;
 public record SAssessmentDTO(
         UUID id,
         String title,
-        String description
+        String description,
+        SAssessmentSettingDTO settings
 ) {
     public static SAssessmentDTO fromEntity(Assessment entity) {
         return new SAssessmentDTO(
                 entity.getId(),
                 entity.getTitle(),
-                entity.getDescription()
+                entity.getDescription(),
+                SAssessmentSettingDTO.fromEntity(entity)
         );
     }
 }
