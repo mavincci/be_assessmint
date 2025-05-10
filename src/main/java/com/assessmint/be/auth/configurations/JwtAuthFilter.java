@@ -3,6 +3,7 @@ package com.assessmint.be.auth.configurations;
 import com.assessmint.be.auth.services.AuthUserDetailService;
 import com.assessmint.be.auth.services.JwtUtils;
 import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -48,6 +49,13 @@ public class JwtAuthFilter extends OncePerRequestFilter {
          response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
          response.setContentType("application/json");
          response.getWriter().write("{\"statusCode\": 401, \"message\": \"AUTH_TOKEN_EXPIRED\"}");
+         response.getWriter().flush();
+         response.getWriter().close();
+         return;
+      }catch (MalformedJwtException e) {
+         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+         response.setContentType("application/json");
+         response.getWriter().write("{\"statusCode\": 401, \"message\": \"AUTH_TOKEN_INVALID\"}");
          response.getWriter().flush();
          response.getWriter().close();
          return;
