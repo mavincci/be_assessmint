@@ -4,7 +4,6 @@ import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
-import com.assessmint.be.assessment.dtos.attempt.DoAnswerDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
@@ -26,7 +25,6 @@ import com.assessmint.be.global.configurations.DateConstants;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -290,5 +288,14 @@ public class AssessmentService {
                 "assessmentId", _assessment.getId(),
                 "sectionId", _section.getId()
         );
+    }
+
+    public SAssessmentDTO basicInfo(UUID uuid, AuthUser user) {
+        final var assessment = _getAssessmentById(uuid);
+
+        if (!assessment.getOwner().getId().equals(user.getId()))
+            throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
+
+        return SAssessmentDTO.fromEntity(assessment);
     }
 }

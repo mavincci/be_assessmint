@@ -34,11 +34,11 @@ public class Assessment {
 
     private Integer duration;
 
-    private Integer maxAttempts;
+    private Integer maxAttempts = 0;
 
-    private Boolean isPublic;
+    private Boolean isPublic = false;
 
-    private Boolean isPublished;
+    private Boolean isPublished = false;
 
     private LocalDateTime publishedAt;
 

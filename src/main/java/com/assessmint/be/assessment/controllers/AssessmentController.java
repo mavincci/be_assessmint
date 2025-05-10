@@ -4,7 +4,6 @@ import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
-import com.assessmint.be.assessment.dtos.attempt.DoAnswerDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
@@ -101,6 +100,21 @@ public class AssessmentController {
                 HttpStatus.OK.value(),
                 "ASSESSMENT_SECTION_REMOVE_SUCCESS",
                 assessmentService.removeSection(UUID.fromString(sectionId), user)
+        );
+    }
+
+    @GetMapping("/basic_info/{assessmentId}")
+    public ResponseEntity<APIResponse<SAssessmentDTO>> basicInfo(
+            @org.hibernate.validator.constraints.UUID
+            @NotBlank
+            @PathVariable("assessmentId")
+            String id,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENT_BASIC_INFO_FETCH_SUCCESS",
+                assessmentService.basicInfo(UUID.fromString(id), user)
         );
     }
 
