@@ -34,10 +34,15 @@ public class Assessment {
 
     private Integer duration;
 
+    @Builder.Default
     private Integer maxAttempts = 0;
 
+    @Column(nullable = false)
+    @Builder.Default
     private Boolean isPublic = false;
 
+    @Column(nullable = false)
+    @Builder.Default
     private Boolean isPublished = false;
 
     private LocalDateTime publishedAt;

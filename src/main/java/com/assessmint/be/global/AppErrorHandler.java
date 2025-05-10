@@ -84,6 +84,7 @@ public class AppErrorHandler {
 
    @ExceptionHandler(value = {HttpMessageNotReadableException.class})
    public ResponseEntity<APIResponse<Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+      e.printStackTrace();
       return APIResponse.build(
             HttpStatus.BAD_REQUEST.value(),
             "REQUIRED_REQUEST_BODY_MISSING",

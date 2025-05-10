@@ -29,6 +29,7 @@ public class Attempt {
     @ManyToOne
     private Assessment assessment;
 
+    @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private List<QuestionAttempt> answers = List.of();
 

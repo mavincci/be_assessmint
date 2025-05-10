@@ -7,16 +7,22 @@ import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
+import com.assessmint.be.assessment.dtos.question.QuestionMultipleChoiceDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionTrueFalseDTO;
+import com.assessmint.be.assessment.dtos.question.add_question.AddMultipleChoiceQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.add_question.AddTrueFalseQuestionDTO;
 import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.assessment.entities.AssessmentSection;
 import com.assessmint.be.assessment.entities.Attempt;
+import com.assessmint.be.assessment.entities.questions.MCQAnswer;
+import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 import com.assessmint.be.assessment.helpers.QuestionType;
 import com.assessmint.be.assessment.repositories.AssessmentRepository;
 import com.assessmint.be.assessment.repositories.AssessmentSectionRepository;
 import com.assessmint.be.assessment.repositories.AttemptRepository;
+import com.assessmint.be.assessment.repositories.questions.MCQAnswerRepository;
+import com.assessmint.be.assessment.repositories.questions.MultipleChoiceQuestionRepository;
 import com.assessmint.be.assessment.repositories.questions.TrueFalseQuestionRepository;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.auth.entities.helpers.AuthRole;
@@ -25,6 +31,7 @@ import com.assessmint.be.global.configurations.DateConstants;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -44,6 +51,8 @@ public class AssessmentService {
     private final AttemptRepository attemptRepository;
 
     private final TrueFalseQuestionRepository trueFalseQuestionRepository;
+    private final MultipleChoiceQuestionRepository multipleChoiceQuestionRepository;
+    private final MCQAnswerRepository mcqAnswerRepository;
 
     public SAssessmentDTO create(
             CreateAssessmentDTO reqDto,
@@ -116,6 +125,7 @@ public class AssessmentService {
                 .toList();
     }
 
+    @Transactional
     public QuestionDTO addQuestion(AddQuestionDTO reqDto, AuthUser user) {
         final var _section = assessmentSectionRepository
                 .findById(UUID.fromString(reqDto.sectionId))
@@ -134,7 +144,7 @@ public class AssessmentService {
 
         return switch (_section.getQuestionType()) {
             case TRUE_OR_FALSE -> handleTrueFalseQuestion((AddTrueFalseQuestionDTO) reqDto, _section);
-            case MULTIPLE_CHOICE -> throw new NotImplementedException("MULTIPLE_CHOICE_NOT_IMPLEMENTED");
+            case MULTIPLE_CHOICE -> handleMultipleChoiceQuestion((AddMultipleChoiceQuestionDTO) reqDto, _section);
         };
     }
 
@@ -155,6 +165,42 @@ public class AssessmentService {
         final var _savedSection = assessmentSectionRepository.save(_section);
 
         return QuestionTrueFalseDTO.fromEntity(_savedQuestion);
+    }
+
+    @Transactional
+    public QuestionDTO handleMultipleChoiceQuestion(AddMultipleChoiceQuestionDTO reqDto, AssessmentSection _section) {
+        final List<String> options = reqDto.getOptions().stream().map(String::trim).distinct().toList();
+        final List<String> answers = reqDto.getAnswers().stream().map(String::trim).distinct().toList();
+
+        String questionText = reqDto.getQuestionText().trim();
+
+        final List<MCQAnswer> answerOptions = options.stream()
+                .map(ans -> MCQAnswer.builder()
+                        .answerText(ans)
+                        .build())
+                .toList();
+
+        final var savedAnswerOptions = mcqAnswerRepository.saveAll(answerOptions);
+
+        final List<UUID> answerIds = savedAnswerOptions.stream()
+                .filter(ans -> answers.contains(ans.getAnswerText()))
+                .map(MCQAnswer::getId)
+                .toList();
+
+        final var tempQuestion = MultipleChoiceQuestion.builder()
+                .questionText(questionText)
+                .options(savedAnswerOptions)
+                .answers(answerIds)
+                .build();
+
+        tempQuestion.setSection(_section);
+
+        _section.addQuestion(tempQuestion);
+
+        final var _savedQuestion = multipleChoiceQuestionRepository.save(tempQuestion);
+        final var _savedSection = assessmentSectionRepository.save(_section);
+
+        return QuestionMultipleChoiceDTO.fromEntity(_savedQuestion);
     }
 
     public AssessmentSettingDTO updateSettings(UpdateSettingDTO reqDto, AuthUser user) {
