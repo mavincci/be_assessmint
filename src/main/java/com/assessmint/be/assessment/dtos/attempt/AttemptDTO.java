@@ -9,6 +9,7 @@ public record AttemptDTO(
         UUID id,
         UUID examineeId,
         UUID assessmentId,
+        LocalDateTime endsAt,
         LocalDateTime createdAt
 ) {
     public static AttemptDTO fromEntity(Attempt entity) {
@@ -16,6 +17,7 @@ public record AttemptDTO(
                 entity.getId(),
                 entity.getExaminee().getId(),
                 entity.getAssessment().getId(),
+                entity.getEndsAt(),
                 entity.getCreatedAt()
         );
     }

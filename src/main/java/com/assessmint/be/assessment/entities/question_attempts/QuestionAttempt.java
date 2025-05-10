@@ -1,16 +1,25 @@
-package com.assessmint.be.assessment.helpers;
+package com.assessmint.be.assessment.entities.question_attempts;
 
+import com.assessmint.be.assessment.helpers.QuestionType;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.UUID;
 
-@Embeddable
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
+@DiscriminatorColumn(name = "question_type", discriminatorType = DiscriminatorType.STRING)
 @Getter
+@Setter
 public abstract class QuestionAttempt {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
+    protected UUID id;
+
     protected UUID questionId;
 
     @Enumerated(EnumType.STRING)

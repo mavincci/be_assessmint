@@ -1,23 +1,18 @@
-package com.assessmint.be.assessment.entities.questions;
+package com.assessmint.be.assessment.entities.question_attempts;
 
-import com.assessmint.be.assessment.entities.Question;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "question_true_false")
 @DiscriminatorValue("TRUE_OR_FALSE")
 @Getter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TrueFalseQuestion extends Question {
-    private String questionText;
-
+public class TrueFalseAttempt extends QuestionAttempt {
     private boolean answer;
 }

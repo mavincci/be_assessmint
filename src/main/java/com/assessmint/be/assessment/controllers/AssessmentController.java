@@ -4,6 +4,7 @@ import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
+import com.assessmint.be.assessment.dtos.attempt.DoAnswerDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
@@ -24,6 +25,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -84,6 +86,21 @@ public class AssessmentController {
                 HttpStatus.OK.value(),
                 "ASSESSMENT_SECTIONS_GET_SUCCESS",
                 assessmentService.getSections(UUID.fromString(id), user)
+        );
+    }
+
+    @DeleteMapping("/remove_section/{sectionId}")
+    public ResponseEntity<APIResponse<Map<String, Object>>> removeSection(
+            @ValidUUID(message = "INVALID_UUID_FORMAT")
+            @NotBlank
+            @PathVariable("sectionId") String sectionId,
+
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENT_SECTION_REMOVE_SUCCESS",
+                assessmentService.removeSection(UUID.fromString(sectionId), user)
         );
     }
 

@@ -1,13 +1,14 @@
 package com.assessmint.be.assessment.entities;
 
-import com.assessmint.be.assessment.helpers.QuestionAttempt;
+import com.assessmint.be.assessment.entities.question_attempts.QuestionAttempt;
 import com.assessmint.be.auth.entities.AuthUser;
 import jakarta.persistence.*;
+import jakarta.persistence.CascadeType;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
-import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -28,13 +29,16 @@ public class Attempt {
     @ManyToOne
     private Assessment assessment;
 
-    @ElementCollection
-    Set<QuestionAttempt> answers = new HashSet<>();
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<QuestionAttempt> answers = List.of();
 
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    void addAnswer(QuestionAttempt answer) {
+    private LocalDateTime endsAt;
+
+    public void addAnswer(QuestionAttempt answer) {
+        answers.removeAll(Set.of(answer));
         answers.add(answer);
     }
 }

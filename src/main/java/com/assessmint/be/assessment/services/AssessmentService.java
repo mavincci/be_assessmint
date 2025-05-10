@@ -4,6 +4,7 @@ import com.assessmint.be.assessment.dtos.assessment.*;
 import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
+import com.assessmint.be.assessment.dtos.attempt.DoAnswerDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
 import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.QuestionDTO;
@@ -25,6 +26,7 @@ import com.assessmint.be.global.configurations.DateConstants;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -33,6 +35,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 
 @Service
@@ -167,11 +170,12 @@ public class AssessmentService {
 
         final var startDateTime = LocalDateTime.parse(reqDto.startDateTime(), DateConstants.dateTimeFormatter);
         final var endDateTime = LocalDateTime.parse(reqDto.endDateTIme(), DateConstants.dateTimeFormatter);
+        final var now = LocalDateTime.now();
 
-        if (startDateTime.isBefore(LocalDateTime.now()))
+        if (startDateTime.isBefore(now))
             throw new ConflictException("START_DATE_MUST_BE_IN_THE_FUTURE");
 
-        if (endDateTime.isBefore(LocalDateTime.now()))
+        if (endDateTime.isBefore(now))
             throw new ConflictException("END_DATE_MUST_BE_IN_THE_FUTURE");
 
         if (endDateTime.isBefore(startDateTime))
@@ -242,6 +246,12 @@ public class AssessmentService {
                 .examinee(user)
                 .build();
 
+        final var endsAt = _assessment.getDuration() == null
+                ? null
+                : LocalDateTime.now().plusMinutes(_assessment.getDuration());
+
+        _attempt.setEndsAt(endsAt);
+
         final var savedAttempt = attemptRepository.save(_attempt);
 
         return AttemptDTO.fromEntity(savedAttempt);
@@ -261,5 +271,24 @@ public class AssessmentService {
                 .toList();
     }
 
-    
+
+    public Map<String, Object> removeSection(UUID uuid, AuthUser user) {
+        final var _section = assessmentSectionRepository.findById(uuid)
+                .orElseThrow(() -> new NotFoundException("SECTION_NOT_FOUND"));
+
+        final var _assessment = _section.getAssessment();
+
+        if (!_assessment.getOwner().getId().equals(user.getId()))
+            throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
+
+        if (_assessment.getIsPublished() != null && _assessment.getIsPublished())
+            throw new ConflictException("ASSESSMENT_ALREADY_PUBLISHED");
+
+        assessmentSectionRepository.delete(_section);
+
+        return Map.of(
+                "assessmentId", _assessment.getId(),
+                "sectionId", _section.getId()
+        );
+    }
 }

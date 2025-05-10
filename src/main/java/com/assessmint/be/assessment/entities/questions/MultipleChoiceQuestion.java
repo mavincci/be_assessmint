@@ -9,6 +9,7 @@ import jakarta.persistence.Table;
 @Table(name = "question_multiple_choice")
 @DiscriminatorValue("MULTIPLE_CHOICE")
 public class MultipleChoiceQuestion extends Question {
+    private String questionText;
     private String[] options;
     private Integer[] correctOptionIndices;
 }
