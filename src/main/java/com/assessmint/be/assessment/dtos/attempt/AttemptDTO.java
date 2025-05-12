@@ -1,6 +1,6 @@
 package com.assessmint.be.assessment.dtos.attempt;
 
-import com.assessmint.be.assessment.entities.Attempt;
+import com.assessmint.be.assessment.entities.question_attempts.Attempt;
 
 import java.time.LocalDateTime;
 import java.util.UUID;

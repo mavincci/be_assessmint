@@ -1,6 +1,6 @@
 package com.assessmint.be.assessment.repositories;
 
-import com.assessmint.be.assessment.entities.Attempt;
+import com.assessmint.be.assessment.entities.question_attempts.Attempt;
 import com.assessmint.be.auth.entities.AuthUser;
 import org.springframework.data.jpa.repository.JpaRepository;
 

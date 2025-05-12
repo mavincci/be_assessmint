@@ -5,8 +5,8 @@ import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSect
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
-import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
-import com.assessmint.be.assessment.dtos.question.QuestionDTO;
+import com.assessmint.be.assessment.dtos.question.q.AddQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.q.QuestionDTO;
 import com.assessmint.be.assessment.services.AssessmentService;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.controllers.dtos.APIResponse;

@@ -1,11 +1,9 @@
-package com.assessmint.be.assessment.dtos.question.add_question;
+package com.assessmint.be.assessment.dtos.question.mcq;
 
-import com.assessmint.be.assessment.dtos.question.AddQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.q.AddQuestionDTO;
 import com.assessmint.be.assessment.helpers.QuestionType;
-import com.assessmint.be.global.controllers.validators.ValidBoolean;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.Getter;
 

@@ -1,5 +1,6 @@
-package com.assessmint.be.assessment.dtos.question.s;
+package com.assessmint.be.assessment.dtos.question.tf;
 
+import com.assessmint.be.assessment.dtos.question.q.SQuestionDTO;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 
 import java.util.HashMap;

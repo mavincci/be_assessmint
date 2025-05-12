@@ -1,8 +1,8 @@
-package com.assessmint.be.assessment.dtos.question.s;
+package com.assessmint.be.assessment.dtos.question.mcq;
 
+import com.assessmint.be.assessment.dtos.question.q.SQuestionDTO;
 import com.assessmint.be.assessment.entities.questions.MCQAnswer;
 import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
-import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 
 import java.util.HashMap;
 import java.util.List;

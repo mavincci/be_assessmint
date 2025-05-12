@@ -2,7 +2,7 @@ package com.assessmint.be.assessment.dtos.attempt;
 
 import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
 import com.assessmint.be.assessment.entities.Assessment;
-import com.assessmint.be.assessment.entities.Attempt;
+import com.assessmint.be.assessment.entities.question_attempts.Attempt;
 import com.assessmint.be.assessment.entities.question_attempts.QuestionAttempt;
 
 import java.util.List;

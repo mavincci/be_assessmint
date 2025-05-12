@@ -1,6 +1,5 @@
 package com.assessmint.be.assessment.entities.questions;
 
-import com.assessmint.be.assessment.entities.Question;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;

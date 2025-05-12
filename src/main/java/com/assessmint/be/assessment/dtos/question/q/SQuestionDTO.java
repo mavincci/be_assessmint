@@ -1,6 +1,8 @@
-package com.assessmint.be.assessment.dtos.question.s;
+package com.assessmint.be.assessment.dtos.question.q;
 
-import com.assessmint.be.assessment.entities.Question;
+import com.assessmint.be.assessment.dtos.question.mcq.SMultipleChoiceQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.tf.STrueFalseQuestionDTO;
+import com.assessmint.be.assessment.entities.questions.Question;
 import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 import lombok.Getter;

@@ -1,6 +1,6 @@
 package com.assessmint.be.assessment.dtos.assessment_section;
 
-import com.assessmint.be.assessment.dtos.question.s.SQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.q.SQuestionDTO;
 import com.assessmint.be.assessment.entities.AssessmentSection;
 import com.assessmint.be.assessment.helpers.QuestionType;
 

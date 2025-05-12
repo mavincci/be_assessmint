@@ -1,5 +1,6 @@
 package com.assessmint.be.assessment.entities;
 
+import com.assessmint.be.assessment.entities.questions.Question;
 import com.assessmint.be.assessment.helpers.QuestionType;
 import jakarta.persistence.*;
 import jakarta.persistence.GenerationType;

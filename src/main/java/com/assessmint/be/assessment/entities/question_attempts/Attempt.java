@@ -1,6 +1,6 @@
-package com.assessmint.be.assessment.entities;
+package com.assessmint.be.assessment.entities.question_attempts;
 
-import com.assessmint.be.assessment.entities.question_attempts.QuestionAttempt;
+import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.auth.entities.AuthUser;
 import jakarta.persistence.*;
 import jakarta.persistence.CascadeType;

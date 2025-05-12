@@ -1,7 +1,7 @@
-package com.assessmint.be.assessment.dtos.question;
+package com.assessmint.be.assessment.dtos.question.q;
 
-import com.assessmint.be.assessment.dtos.question.add_question.AddMultipleChoiceQuestionDTO;
-import com.assessmint.be.assessment.dtos.question.add_question.AddTrueFalseQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.mcq.AddMultipleChoiceQuestionDTO;
+import com.assessmint.be.assessment.dtos.question.tf.AddTrueFalseQuestionDTO;
 import com.assessmint.be.assessment.helpers.QuestionType;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
