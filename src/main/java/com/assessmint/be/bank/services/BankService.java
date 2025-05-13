@@ -4,6 +4,7 @@ import com.assessmint.be.assessment.helpers.QuestionType;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.bank.dtos.BankDTO;
 import com.assessmint.be.bank.dtos.CreateBankDTO;
+import com.assessmint.be.bank.dtos.SBankDTO;
 import com.assessmint.be.bank.dtos.questions.BankQuestionDTO;
 import com.assessmint.be.bank.dtos.questions.add.AddBankMCQDTO;
 import com.assessmint.be.bank.dtos.questions.add.AddBankQuestionDTO;
@@ -127,6 +128,20 @@ public class BankService {
 
         final BankMultipleChoiceQuestion saved = bankMCQRepository.save(temp);
 
+        bank.addQuestion(saved);
+        bankRepository.save(bank);
+
         return BankQuestionDTO.fromEntity(saved);
+    }
+
+    public SBankDTO getById(UUID uuid, AuthUser user) {
+        final Bank bank = bankRepository.findById(uuid)
+                .orElseThrow(() -> new NotFoundException("BANK_NOT_FOUND"));
+
+        if (!bank.getOwner().getId().equals(user.getId())) {
+            throw new NotAuthorizedException("BANK_ACCESS_NOT_ALLOWED");
+        }
+
+        return SBankDTO.fromEntity(bank);
     }
 }
