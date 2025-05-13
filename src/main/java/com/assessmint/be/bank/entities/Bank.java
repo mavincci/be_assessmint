@@ -2,6 +2,7 @@ package com.assessmint.be.bank.entities;
 
 import com.assessmint.be.assessment.helpers.QuestionType;
 import com.assessmint.be.auth.entities.AuthUser;
+import com.assessmint.be.bank.entities.questions.BankQuestion;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -41,9 +43,17 @@ public class Bank {
     @ManyToOne
     private BankCategory category;
 
+    @OneToMany
+    @Builder.Default
+    private List<BankQuestion> questions = List.of();
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
     private LocalDateTime updatedAt;
+
+    public void addQuestion(BankQuestion question) {
+        questions.add(question);
+    }
 }

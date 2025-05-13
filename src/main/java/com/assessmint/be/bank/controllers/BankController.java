@@ -3,6 +3,8 @@ package com.assessmint.be.bank.controllers;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.bank.dtos.BankDTO;
 import com.assessmint.be.bank.dtos.CreateBankDTO;
+import com.assessmint.be.bank.dtos.questions.BankQuestionDTO;
+import com.assessmint.be.bank.dtos.questions.add.AddBankQuestionDTO;
 import com.assessmint.be.bank.services.BankService;
 import com.assessmint.be.global.controllers.dtos.APIResponse;
 import jakarta.validation.Valid;
@@ -39,6 +41,18 @@ public class BankController {
                 HttpStatus.OK.value(),
                 "QUESTION_BANK_FETCH_SUCCESS",
                 bankService.mine(user)
+        );
+    }
+
+    @PostMapping("/add_question")
+    public ResponseEntity<APIResponse<BankQuestionDTO>> addQuestion(
+            @Valid @RequestBody AddBankQuestionDTO reqDto,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "QUESTION_BANK_ADD_QUESTION_SUCCESS",
+                bankService.addQuestion(reqDto, user)
         );
     }
 }
