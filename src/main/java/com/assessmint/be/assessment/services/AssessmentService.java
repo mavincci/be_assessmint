@@ -260,7 +260,7 @@ public class AssessmentService {
         }};
     }
 
-    @PreAuthorize("hasRole('EXAMINEE')")
+//    @PreAuthorize("hasRole('EXAMINEE')")
     public AttemptDTO startAssessment(StartAssessmentDTO reqDto, AuthUser user) {
         final var _assessment = _getAssessmentById(UUID.fromString(reqDto.assessmentId()));
 

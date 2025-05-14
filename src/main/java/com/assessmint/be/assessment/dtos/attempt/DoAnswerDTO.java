@@ -10,7 +10,8 @@ import org.hibernate.validator.constraints.UUID;
 @Getter
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, include = JsonTypeInfo.As.PROPERTY, property = "questionType")
 @JsonSubTypes({
-        @JsonSubTypes.Type(value = DoAnswerTrueFalseDTO.class, name = "TRUE_OR_FALSE")
+        @JsonSubTypes.Type(value = DoAnswerTrueFalseDTO.class, name = "TRUE_OR_FALSE"),
+        @JsonSubTypes.Type(value = DoAnswerMCQDTO.class, name = "MULTIPLE_CHOICE")
 })
 public abstract class DoAnswerDTO {
     @UUID
