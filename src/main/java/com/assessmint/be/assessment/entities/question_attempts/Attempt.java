@@ -33,6 +33,11 @@ public class Attempt {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<QuestionAttempt> answers = Set.of();
 
+    @Builder.Default
+    private Boolean isFinished = false;
+
+    private LocalDateTime finishedAt;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 

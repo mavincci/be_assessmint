@@ -1,0 +1,11 @@
+package com.assessmint.be.assessment.dtos.attempt;
+
+import jakarta.validation.constraints.NotBlank;
+import org.hibernate.validator.constraints.UUID;
+
+public record FinishDTO(
+        @NotBlank
+        @UUID
+        String assessmentId
+) {
+}

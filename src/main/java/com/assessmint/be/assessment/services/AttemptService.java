@@ -1,9 +1,6 @@
 package com.assessmint.be.assessment.services;
 
-import com.assessmint.be.assessment.dtos.attempt.AttemptStatusDTO;
-import com.assessmint.be.assessment.dtos.attempt.DoAnswerDTO;
-import com.assessmint.be.assessment.dtos.attempt.DoAnswerMCQDTO;
-import com.assessmint.be.assessment.dtos.attempt.DoAnswerTrueFalseDTO;
+import com.assessmint.be.assessment.dtos.attempt.*;
 import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.assessment.entities.question_attempts.Attempt;
 import com.assessmint.be.assessment.entities.question_attempts.MCQAttempt;
@@ -11,6 +8,7 @@ import com.assessmint.be.assessment.entities.questions.MCQAnswer;
 import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
 import com.assessmint.be.assessment.entities.questions.Question;
 import com.assessmint.be.assessment.entities.question_attempts.TrueFalseAttempt;
+import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 import com.assessmint.be.assessment.repositories.AssessmentSectionRepository;
 import com.assessmint.be.assessment.repositories.AttemptRepository;
 import com.assessmint.be.assessment.repositories.QuestionRepository;
@@ -22,15 +20,14 @@ import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.Utils;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -138,5 +135,79 @@ public class AttemptService {
         final var _assessmentEntity = _assessment.getAssessment();
 
         return AttemptStatusDTO.fromEntity(_assessment, _assessmentEntity);
+    }
+
+    public Map<String, Object> finishAssessment(@Valid FinishDTO reqdto, AuthUser user) {
+        final UUID assessmentId = UUID.fromString(reqdto.assessmentId());
+
+        final Attempt tempAttempt = attemptRepository
+                .findFirstByAssessmentIdAndExamineeOrderByCreatedAtDesc(
+                        assessmentId, user)
+                .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_STARTED_YET"));
+
+        final List<Question> questions = tempAttempt.getAssessment()
+                .getSections()
+                .stream()
+                .flatMap(section -> section.getQuestions().stream())
+                .toList();
+
+        int successCount = 0;
+        int failureCount = 0;
+        int skippedCount = 0;
+
+        for (final var ans : tempAttempt.getAnswers()) {
+            final Optional<Question> question = questions.stream()
+                    .filter(q -> q.getId().equals(ans.getQuestionId()))
+                    .findFirst();
+
+            if (question.isEmpty()) {
+                skippedCount++;
+                continue;
+            }
+
+            switch (question.get().getQuestionType()) {
+                case TRUE_OR_FALSE -> {
+                    final var tfAns = (TrueFalseAttempt) ans;
+                    final var tfQuestion = (TrueFalseQuestion) question.get();
+
+                    if (tfAns.isAnswer() == tfQuestion.isAnswer())
+                        successCount++;
+                    else
+                        failureCount++;
+                }
+                case MULTIPLE_CHOICE -> {
+                    final var mcqAns = (MCQAttempt) ans;
+                    final var mcqQuestion = (MultipleChoiceQuestion) question.get();
+
+                    final var correctAnswers = mcqQuestion.getAnswers();
+
+                    final var isCorrect = new HashSet<>(correctAnswers).containsAll(mcqAns.getAnswers());
+
+                    if (isCorrect)
+                        successCount++;
+                    else
+                        failureCount++;
+                }
+                default -> throw new NotImplementedException();
+            }
+        }
+
+
+        System.out.println("Success: " + successCount);
+        System.out.println("Failed: " + failureCount);
+        System.out.println("Skipped: " + skippedCount);
+
+        tempAttempt.setIsFinished(true);
+        tempAttempt.setFinishedAt(LocalDateTime.now());
+
+        final Attempt saved = attemptRepository.save(tempAttempt);
+
+
+        return Map.of(
+                "successCount", successCount,
+                "failureCount", failureCount,
+                "skippedCount", skippedCount,
+                "attempt", AttemptStatusDTO.fromEntity(saved, saved.getAssessment())
+        );
     }
 }
