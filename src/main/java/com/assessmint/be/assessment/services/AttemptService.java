@@ -2,6 +2,7 @@ package com.assessmint.be.assessment.services;
 
 import com.assessmint.be.assessment.dtos.attempt.*;
 import com.assessmint.be.assessment.entities.Assessment;
+import com.assessmint.be.assessment.entities.AttemptResult;
 import com.assessmint.be.assessment.entities.question_attempts.Attempt;
 import com.assessmint.be.assessment.entities.question_attempts.MCQAttempt;
 import com.assessmint.be.assessment.entities.questions.MCQAnswer;
@@ -11,6 +12,7 @@ import com.assessmint.be.assessment.entities.question_attempts.TrueFalseAttempt;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 import com.assessmint.be.assessment.repositories.AssessmentSectionRepository;
 import com.assessmint.be.assessment.repositories.AttemptRepository;
+import com.assessmint.be.assessment.repositories.AttemptResultRepository;
 import com.assessmint.be.assessment.repositories.QuestionRepository;
 import com.assessmint.be.assessment.repositories.question_attempts.MCQAttemptRepository;
 import com.assessmint.be.assessment.repositories.question_attempts.TrueFalseAttemptRepository;
@@ -20,6 +22,7 @@ import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.Utils;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
@@ -40,6 +43,7 @@ public class AttemptService {
     private final TrueFalseAttemptRepository trueFalseAttemptRepository;
     private final MCQAttemptRepository mcqAttemptRepository;
     private final MCQAnswerRepository mcqAnswerRepository;
+    private final AttemptResultRepository attemptResultRepository;
 
     //    @PreAuthorize("hasRole('EXAMINEE')")
     public AttemptStatusDTO doAnswer(DoAnswerDTO reqDto, AuthUser user) {
@@ -137,6 +141,7 @@ public class AttemptService {
         return AttemptStatusDTO.fromEntity(_assessment, _assessmentEntity);
     }
 
+    @Transactional
     public Map<String, Object> finishAssessment(@Valid FinishDTO reqdto, AuthUser user) {
         final UUID assessmentId = UUID.fromString(reqdto.assessmentId());
 
@@ -202,6 +207,15 @@ public class AttemptService {
 
         final Attempt saved = attemptRepository.save(tempAttempt);
 
+        final AttemptResult tempResult = AttemptResult.builder()
+                .attemptId(saved.getId())
+                .assessmentId(saved.getAssessment().getId())
+                .successCount(successCount)
+                .failureCount(failureCount)
+                .skippedCount(skippedCount)
+                .build();
+
+        attemptResultRepository.save(tempResult);
 
         return Map.of(
                 "successCount", successCount,
@@ -209,5 +223,21 @@ public class AttemptService {
                 "skippedCount", skippedCount,
                 "attempt", AttemptStatusDTO.fromEntity(saved, saved.getAssessment())
         );
+    }
+
+    public AttemptResultDTO fetchResult(@Valid Res reqdto, UUID id) {
+        final Attempt _attempt = attemptRepository.findById(reqdto.attemptId())
+                .orElseThrow(() -> new NotFoundException("ATTEMPT_NOT_FOUND"));
+
+        if (!_attempt.getExaminee().getId().equals(id))
+            throw new ConflictException("ATTEMPT_NOT_OWNED_BY_USER");
+
+        final AttemptResult _result = attemptResultRepository.findByAttemptId(reqdto.attemptId())
+                .orElseThrow(() -> new NotFoundException("ATTEMPT_RESULT_NOT_FOUND"));
+
+        if (!_result.getAssessmentId().equals(reqdto.assessmentId()))
+            throw new ConflictException("ATTEMPT_RESULT_NOT_OWNED_BY_ASSESSMENT");
+
+        return AttemptResultDTO.fromEntity(_result);
     }
 }
