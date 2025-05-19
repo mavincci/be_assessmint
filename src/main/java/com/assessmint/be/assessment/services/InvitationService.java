@@ -6,6 +6,7 @@ import com.assessmint.be.assessment.entities.Invitation;
 import com.assessmint.be.assessment.repositories.AssessmentRepository;
 import com.assessmint.be.assessment.repositories.InvitationRepository;
 import com.assessmint.be.auth.entities.AuthUser;
+import com.assessmint.be.global.Utils;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
 import com.assessmint.be.notification.EmailService;
@@ -53,13 +54,13 @@ public class InvitationService {
                 .toList();
 
         invitation.addEmails(newEmails);
-//        final Invitation saved = invitationRepository.save(invitation);
+        final Invitation saved = invitationRepository.save(invitation);
 
         for (final String email : newEmails) {
             final String link = frontendUrl + "/invitation/" + assessmentId;
             final Map<String, Object> model = Map.of(
-                    "firstName", user.getFirstName(),
-                    "lastName", user.getLastName(),
+                    "firstName", Utils.capitalizeName(user.getFirstName()),
+                    "lastName", Utils.capitalizeName(user.getLastName()),
                     "assessmentName", assessment.getTitle(),
                     "duration", assessment.getDuration(),
                     "dueDate", assessment.getEndDateTime(),
