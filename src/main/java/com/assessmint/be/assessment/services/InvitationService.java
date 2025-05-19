@@ -84,4 +84,20 @@ public class InvitationService {
                 "emails", newEmails
         );
     }
+
+    public Map<String, Object> getInvited(UUID assessmentId, AuthUser user) {
+        final Assessment assessment = assessmentRepository.findById(assessmentId)
+                .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_FOUND"));
+
+        if (!assessment.getOwner().getId().equals(user.getId()))
+            throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_ALLOWED");
+
+        final Invitation invitation = invitationRepository.findById(assessmentId)
+                .orElseThrow(() -> new NotFoundException("INVITATION_NOT_FOUND"));
+
+        return Map.of(
+                "assessmentId", invitation.getAssessmentId(),
+                "emails", invitation.getEmails()
+        );
+    }
 }
