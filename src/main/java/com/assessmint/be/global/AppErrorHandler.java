@@ -6,6 +6,7 @@ import com.assessmint.be.global.exceptions.EnumIllegalArgumentException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
 import io.jsonwebtoken.ExpiredJwtException;
+import jakarta.validation.UnexpectedTypeException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -30,193 +31,203 @@ import java.util.Map;
 
 @ControllerAdvice
 public class AppErrorHandler {
-   static final Logger logger = LoggerFactory.getLogger(AppErrorHandler.class);
+    static final Logger logger = LoggerFactory.getLogger(AppErrorHandler.class);
 
-   @ExceptionHandler(value = {ExpiredJwtException.class})
-   public ResponseEntity<APIResponse<Object>> handleExpiredJwtException(ExpiredJwtException e) {
-      throw new NotAuthorizedException("TOKEN_IS_EXPIRED");
-   }
+    @ExceptionHandler(value = {ExpiredJwtException.class})
+    public ResponseEntity<APIResponse<Object>> handleExpiredJwtException(ExpiredJwtException e) {
+        throw new NotAuthorizedException("TOKEN_IS_EXPIRED");
+    }
 
-   @ExceptionHandler(value = BadCredentialsException.class)
-   public ResponseEntity<APIResponse<Object>> handleBadCredentialsException(BadCredentialsException e) {
-      return APIResponse.build(
-            HttpStatus.UNAUTHORIZED.value(),
-            e.getMessage(),
-            null
-      );
-   }
+    @ExceptionHandler(value = BadCredentialsException.class)
+    public ResponseEntity<APIResponse<Object>> handleBadCredentialsException(BadCredentialsException e) {
+        return APIResponse.build(
+                HttpStatus.UNAUTHORIZED.value(),
+                e.getMessage(),
+                null
+        );
+    }
 
-   @ExceptionHandler(value = AuthorizationDeniedException.class)
-   public ResponseEntity<APIResponse<Object>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
-      return APIResponse.build(
-            HttpStatus.UNAUTHORIZED.value(),
-            e.getMessage(),
-            null
-      );
-   }
+    @ExceptionHandler(value = UnexpectedTypeException.class)
+    public ResponseEntity<APIResponse<Object>> handleUnexpectedTypeException(UnexpectedTypeException e) {
+        e.printStackTrace();
+        return APIResponse.build(
+                HttpStatus.FORBIDDEN.value(),
+                "INCORRECT_REQUEST_BODY_STRUCTURE",
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {NotAuthorizedException.class})
-   public ResponseEntity<APIResponse<Object>> handleNotAuthorizedException(NotAuthorizedException e) {
-      return APIResponse.build(
-            HttpStatus.UNAUTHORIZED.value(),
-            e.getMessage(),
-            null
-      );
-   }
+    @ExceptionHandler(value = AuthorizationDeniedException.class)
+    public ResponseEntity<APIResponse<Object>> handleAuthorizationDeniedException(AuthorizationDeniedException e) {
+        return APIResponse.build(
+                HttpStatus.UNAUTHORIZED.value(),
+                e.getMessage(),
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {InsufficientAuthenticationException.class})
-   public ResponseEntity<APIResponse<Object>> handleInsufficientAuthenticationException(InsufficientAuthenticationException e) {
-      return APIResponse.build(
-            HttpStatus.FORBIDDEN.value(),
-            "NOT_AUTHORIZED",
-            null
-      );
-   }
+    @ExceptionHandler(value = {NotAuthorizedException.class})
+    public ResponseEntity<APIResponse<Object>> handleNotAuthorizedException(NotAuthorizedException e) {
+        return APIResponse.build(
+                HttpStatus.UNAUTHORIZED.value(),
+                e.getMessage(),
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {HttpMediaTypeNotSupportedException.class})
-   public ResponseEntity<APIResponse<Object>> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e) {
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            "Media type " + e.getContentType() + " not allowed",
-            null
-      );
-   }
+    @ExceptionHandler(value = {InsufficientAuthenticationException.class})
+    public ResponseEntity<APIResponse<Object>> handleInsufficientAuthenticationException(InsufficientAuthenticationException e) {
+        return APIResponse.build(
+                HttpStatus.FORBIDDEN.value(),
+                "NOT_AUTHORIZED",
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {HttpMessageNotReadableException.class})
-   public ResponseEntity<APIResponse<Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-      e.printStackTrace();
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            "REQUIRED_REQUEST_BODY_MISSING",
-            null
-      );
-   }
+    @ExceptionHandler(value = {HttpMediaTypeNotSupportedException.class})
+    public ResponseEntity<APIResponse<Object>> handleHttpMediaTypeNotSupportedException(HttpMediaTypeNotSupportedException e) {
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                "Media type " + e.getContentType() + " not allowed",
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {NotFoundException.class})
-   public ResponseEntity<APIResponse<Object>> handleNotFoundException(NotFoundException e) {
-      return APIResponse.build(
-            HttpStatus.NOT_FOUND.value(),
-            e.getMessage(),
-            null
-      );
-   }
+    @ExceptionHandler(value = {HttpMessageNotReadableException.class})
+    public ResponseEntity<APIResponse<Object>> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        e.printStackTrace();
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                "REQUIRED_REQUEST_BODY_MISSING",
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {ConflictException.class})
-   public ResponseEntity<APIResponse<Object>> handleConflictException(ConflictException e) {
-      return APIResponse.build(
-            HttpStatus.CONFLICT.value(),
-            e.getMessage(),
-            null
-      );
-   }
+    @ExceptionHandler(value = {NotFoundException.class})
+    public ResponseEntity<APIResponse<Object>> handleNotFoundException(NotFoundException e) {
+        return APIResponse.build(
+                HttpStatus.NOT_FOUND.value(),
+                e.getMessage(),
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {IllegalArgumentException.class})
-   public ResponseEntity<APIResponse<Object>> handleNotFoundException(IllegalArgumentException e) {
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            e.getMessage(),
-            null
-      );
-   }
+    @ExceptionHandler(value = {ConflictException.class})
+    public ResponseEntity<APIResponse<Object>> handleConflictException(ConflictException e) {
+        return APIResponse.build(
+                HttpStatus.CONFLICT.value(),
+                e.getMessage(),
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {EnumIllegalArgumentException.class})
-   public ResponseEntity<APIResponse<Object>> handleNotFoundException(EnumIllegalArgumentException e) {
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            e.getMessage(),
-            null
-      );
-   }
+    @ExceptionHandler(value = {IllegalArgumentException.class})
+    public ResponseEntity<APIResponse<Object>> handleNotFoundException(IllegalArgumentException e) {
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage(),
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {NoResourceFoundException.class})
-   public ResponseEntity<APIResponse<Object>> handleNoResourceFoundException(NoResourceFoundException e) {
-      logger.info("Unknown endpoint requested {}", e.getResourcePath());
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            "Endpoint " + e.getResourcePath() + " is not found.",
-            null
-      );
-   }
+    @ExceptionHandler(value = {EnumIllegalArgumentException.class})
+    public ResponseEntity<APIResponse<Object>> handleNotFoundException(EnumIllegalArgumentException e) {
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                e.getMessage(),
+                null
+        );
+    }
 
-   @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class})
-   public ResponseEntity<APIResponse<Object>> handleHttpRequestMethodNotSupportedException(
-         HttpRequestMethodNotSupportedException e) {
-      logger.info("Unknown method requested {}", e.getMethod());
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            "Method " + e.getMethod() + " is not found on this endpoint.",
-            null
-      );
-   }
+    @ExceptionHandler(value = {NoResourceFoundException.class})
+    public ResponseEntity<APIResponse<Object>> handleNoResourceFoundException(NoResourceFoundException e) {
+        logger.info("Unknown endpoint requested {}", e.getResourcePath());
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                "Endpoint " + e.getResourcePath() + " is not found.",
+                null
+        );
+    }
 
-   //   @ResponseStatus(HttpStatus.BAD_REQUEST)
-   @ExceptionHandler(MethodArgumentNotValidException.class)
-   public ResponseEntity<APIResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(value = {HttpRequestMethodNotSupportedException.class})
+    public ResponseEntity<APIResponse<Object>> handleHttpRequestMethodNotSupportedException(
+            HttpRequestMethodNotSupportedException e) {
+        logger.info("Unknown method requested {}", e.getMethod());
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                "Method " + e.getMethod() + " is not found on this endpoint.",
+                null
+        );
+    }
 
-      Map<String, String> errors = new HashMap<>();
+    //   @ResponseStatus(HttpStatus.BAD_REQUEST)
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<APIResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
 
-      ex.getBindingResult().getAllErrors().forEach((error) -> {
-         if (error instanceof FieldError) {
-            String fieldName = ((FieldError) error).getField();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-         } else {
-            String fieldName = error.getObjectName();
-            String errorMessage = error.getDefaultMessage();
-            errors.put(fieldName, errorMessage);
-         }
-      });
+        Map<String, String> errors = new HashMap<>();
 
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            "VALIDATION_ERROR",
-            errors
-      );
-   }
+        ex.getBindingResult().getAllErrors().forEach((error) -> {
+            if (error instanceof FieldError) {
+                String fieldName = ((FieldError) error).getField();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            } else {
+                String fieldName = error.getObjectName();
+                String errorMessage = error.getDefaultMessage();
+                errors.put(fieldName, errorMessage);
+            }
+        });
 
-   @ExceptionHandler(HandlerMethodValidationException.class)
-   public ResponseEntity<APIResponse<Map<String, String>>> handleMethodValidationExceptions(HandlerMethodValidationException ex) {
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                "VALIDATION_ERROR",
+                errors
+        );
+    }
 
-      Map<String, String> errors = new HashMap<>();
+    @ExceptionHandler(HandlerMethodValidationException.class)
+    public ResponseEntity<APIResponse<Map<String, String>>> handleMethodValidationExceptions(HandlerMethodValidationException ex) {
 
-      ex.getAllValidationResults().forEach(result -> {
-         errors.put(
-               result.getMethodParameter().getParameterName(),
-               result.getResolvableErrors().get(result.getMethodParameter().getParameterIndex()).getDefaultMessage()
-         );
-      });
+        Map<String, String> errors = new HashMap<>();
 
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            "VALIDATION_ERROR",
-            errors
-      );
-   }
+        ex.getAllValidationResults().forEach(result -> {
+            errors.put(
+                    result.getMethodParameter().getParameterName(),
+                    result.getResolvableErrors().get(result.getMethodParameter().getParameterIndex()).getDefaultMessage()
+            );
+        });
 
-   @ExceptionHandler(MethodArgumentTypeMismatchException.class)
-   public ResponseEntity<APIResponse<Map<String, String>>> handleMethodValidationExceptions(MethodArgumentTypeMismatchException ex) {
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                "VALIDATION_ERROR",
+                errors
+        );
+    }
 
-      Map<String, String> errors = new HashMap<>();
+    @ExceptionHandler(MethodArgumentTypeMismatchException.class)
+    public ResponseEntity<APIResponse<Map<String, String>>> handleMethodValidationExceptions(MethodArgumentTypeMismatchException ex) {
 
-      errors.put(
-            ex.getParameter().getParameterName(),
-            String.format("the required type is - %s", ex.getRequiredType().getSimpleName().toLowerCase()));
+        Map<String, String> errors = new HashMap<>();
 
-      return APIResponse.build(
-            HttpStatus.BAD_REQUEST.value(),
-            "VALIDATION_ERROR",
-            errors
-      );
-   }
+        errors.put(
+                ex.getParameter().getParameterName(),
+                String.format("the required type is - %s", ex.getRequiredType().getSimpleName().toLowerCase()));
 
-   @ExceptionHandler(Exception.class)
-   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-   public ResponseEntity<APIResponse<Object>> handleAllExceptions(Exception e) {
-      e.printStackTrace();
-      return APIResponse.build(
-            HttpStatus.INTERNAL_SERVER_ERROR.value(),
-            "An error occurred while processing your request" + e.getClass().getName(),
-            null
-      );
-   }
+        return APIResponse.build(
+                HttpStatus.BAD_REQUEST.value(),
+                "VALIDATION_ERROR",
+                errors
+        );
+    }
+
+    @ExceptionHandler(Exception.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    public ResponseEntity<APIResponse<Object>> handleAllExceptions(Exception e) {
+        e.printStackTrace();
+        return APIResponse.build(
+                HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                "An error occurred while processing your request" + e.getClass().getName(),
+                null
+        );
+    }
 }

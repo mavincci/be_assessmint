@@ -3,6 +3,7 @@ package com.assessmint.be.assessment.controllers;
 
 import com.assessmint.be.assessment.dtos.attempt.AttemptStatusDTO;
 import com.assessmint.be.assessment.dtos.attempt.DoAnswerDTO;
+import com.assessmint.be.assessment.dtos.attempt.FinishDTO;
 import com.assessmint.be.assessment.services.AttemptService;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.controllers.dtos.APIResponse;
@@ -15,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
 import java.util.UUID;
 
 @RestController
@@ -48,6 +50,18 @@ public class AttemptController {
                 HttpStatus.OK.value(),
                 "ASSESSMENT_ANSWER_SUCCESS",
                 attemptService.doAnswer(reqDto, user)
+        );
+    }
+
+    @PostMapping("/finish")
+    public ResponseEntity<APIResponse<Map<String, Object>>> finishAssessment(
+            @Valid @RequestBody FinishDTO reqdto,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ASSESSMENT_FINISHED_SUCCESS",
+                attemptService.finishAssessment(reqdto, user)
         );
     }
 }

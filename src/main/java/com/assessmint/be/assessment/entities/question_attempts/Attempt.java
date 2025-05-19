@@ -31,7 +31,12 @@ public class Attempt {
 
     @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<QuestionAttempt> answers = List.of();
+    private Set<QuestionAttempt> answers = Set.of();
+
+    @Builder.Default
+    private Boolean isFinished = false;
+
+    private LocalDateTime finishedAt;
 
     @CreationTimestamp
     private LocalDateTime createdAt;
@@ -39,7 +44,6 @@ public class Attempt {
     private LocalDateTime endsAt;
 
     public void addAnswer(QuestionAttempt answer) {
-        answers.removeAll(Set.of(answer));
         answers.add(answer);
     }
 }

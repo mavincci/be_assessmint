@@ -1,27 +1,37 @@
 package com.assessmint.be.assessment.services;
 
-import com.assessmint.be.assessment.dtos.attempt.AttemptStatusDTO;
-import com.assessmint.be.assessment.dtos.attempt.DoAnswerDTO;
-import com.assessmint.be.assessment.dtos.attempt.DoAnswerTrueFalseDTO;
+import com.assessmint.be.assessment.dtos.attempt.*;
 import com.assessmint.be.assessment.entities.Assessment;
+import com.assessmint.be.assessment.entities.AttemptResult;
 import com.assessmint.be.assessment.entities.question_attempts.Attempt;
+import com.assessmint.be.assessment.entities.question_attempts.MCQAttempt;
+import com.assessmint.be.assessment.entities.questions.MCQAnswer;
+import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
 import com.assessmint.be.assessment.entities.questions.Question;
 import com.assessmint.be.assessment.entities.question_attempts.TrueFalseAttempt;
+import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 import com.assessmint.be.assessment.repositories.AssessmentSectionRepository;
 import com.assessmint.be.assessment.repositories.AttemptRepository;
+import com.assessmint.be.assessment.repositories.AttemptResultRepository;
 import com.assessmint.be.assessment.repositories.QuestionRepository;
+import com.assessmint.be.assessment.repositories.question_attempts.MCQAttemptRepository;
 import com.assessmint.be.assessment.repositories.question_attempts.TrueFalseAttemptRepository;
+import com.assessmint.be.assessment.repositories.questions.MCQAnswerRepository;
 import com.assessmint.be.assessment.repositories.questions.TrueFalseQuestionRepository;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.Utils;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
+import java.time.LocalDateTime;
+import java.util.*;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -31,8 +41,11 @@ public class AttemptService {
     private final TrueFalseQuestionRepository trueFalseQuestionRepository;
     private final AttemptRepository attemptRepository;
     private final TrueFalseAttemptRepository trueFalseAttemptRepository;
+    private final MCQAttemptRepository mcqAttemptRepository;
+    private final MCQAnswerRepository mcqAnswerRepository;
+    private final AttemptResultRepository attemptResultRepository;
 
-    @PreAuthorize("hasRole('EXAMINEE')")
+    //    @PreAuthorize("hasRole('EXAMINEE')")
     public AttemptStatusDTO doAnswer(DoAnswerDTO reqDto, AuthUser user) {
         final var sectionId = UUID.fromString(reqDto.getSectionId());
         final var assessmentId = UUID.fromString(reqDto.getAssessmentId());
@@ -60,6 +73,11 @@ public class AttemptService {
                     lastAttempt,
                     _section.getAssessment(),
                     _question);
+            case MULTIPLE_CHOICE -> handleMCQAnswer(
+                    (DoAnswerMCQDTO) reqDto,
+                    lastAttempt,
+                    _section.getAssessment(),
+                    (MultipleChoiceQuestion) _question);
             default -> throw new NotImplementedException();
         };
     }
@@ -79,6 +97,39 @@ public class AttemptService {
         return AttemptStatusDTO.fromEntity(updatedAttempt, assessment);
     }
 
+    private AttemptStatusDTO handleMCQAnswer(DoAnswerMCQDTO reqDto, Attempt lastAttempt, Assessment assessment, MultipleChoiceQuestion question) {
+        try {
+            final Set<UUID> answerIds = reqDto.getAnswers().stream()
+                    .map(UUID::fromString).collect(Collectors.toSet());
+
+            final List<MCQAnswer> answerList = mcqAnswerRepository.findAllById(answerIds);
+
+            if (answerList.size() != answerIds.size())
+                throw new NotFoundException("ANSWER_NOT_FOUND");
+
+            for (final var answer : answerList) {
+                if (!question.getOptions().contains(answer))
+                    throw new NotFoundException("ANSWER_NOT_FOUND_IN_QUESTION");
+            }
+
+            final MCQAttempt temp = MCQAttempt.builder()
+                    .answers(new ArrayList<>(answerIds))
+                    .build();
+            temp.setQuestionId(question.getId());
+
+            final MCQAttempt saved = mcqAttemptRepository.save(temp);
+
+            lastAttempt.addAnswer(temp);
+
+            final var updatedAttempt = attemptRepository.save(lastAttempt);
+
+            return AttemptStatusDTO.fromEntity(updatedAttempt, assessment);
+        } catch (IllegalArgumentException e) {
+            e.printStackTrace();
+            throw new ConflictException("INVALID_ANSWER_ID");
+        }
+    }
+
     public AttemptStatusDTO getAssessmentStatus(UUID assessmentId, AuthUser user) {
         final var _assessment = attemptRepository
                 .findFirstByAssessmentIdAndExamineeOrderByCreatedAtDesc(
@@ -88,5 +139,105 @@ public class AttemptService {
         final var _assessmentEntity = _assessment.getAssessment();
 
         return AttemptStatusDTO.fromEntity(_assessment, _assessmentEntity);
+    }
+
+    @Transactional
+    public Map<String, Object> finishAssessment(@Valid FinishDTO reqdto, AuthUser user) {
+        final UUID assessmentId = UUID.fromString(reqdto.assessmentId());
+
+        final Attempt tempAttempt = attemptRepository
+                .findFirstByAssessmentIdAndExamineeOrderByCreatedAtDesc(
+                        assessmentId, user)
+                .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_STARTED_YET"));
+
+        final List<Question> questions = tempAttempt.getAssessment()
+                .getSections()
+                .stream()
+                .flatMap(section -> section.getQuestions().stream())
+                .toList();
+
+        int successCount = 0;
+        int failureCount = 0;
+        int skippedCount = 0;
+
+        for (final var ans : tempAttempt.getAnswers()) {
+            final Optional<Question> question = questions.stream()
+                    .filter(q -> q.getId().equals(ans.getQuestionId()))
+                    .findFirst();
+
+            if (question.isEmpty()) {
+                skippedCount++;
+                continue;
+            }
+
+            switch (question.get().getQuestionType()) {
+                case TRUE_OR_FALSE -> {
+                    final var tfAns = (TrueFalseAttempt) ans;
+                    final var tfQuestion = (TrueFalseQuestion) question.get();
+
+                    if (tfAns.isAnswer() == tfQuestion.isAnswer())
+                        successCount++;
+                    else
+                        failureCount++;
+                }
+                case MULTIPLE_CHOICE -> {
+                    final var mcqAns = (MCQAttempt) ans;
+                    final var mcqQuestion = (MultipleChoiceQuestion) question.get();
+
+                    final var correctAnswers = mcqQuestion.getAnswers();
+
+                    final var isCorrect = new HashSet<>(correctAnswers).containsAll(mcqAns.getAnswers());
+
+                    if (isCorrect)
+                        successCount++;
+                    else
+                        failureCount++;
+                }
+                default -> throw new NotImplementedException();
+            }
+        }
+
+
+        System.out.println("Success: " + successCount);
+        System.out.println("Failed: " + failureCount);
+        System.out.println("Skipped: " + skippedCount);
+
+        tempAttempt.setIsFinished(true);
+        tempAttempt.setFinishedAt(LocalDateTime.now());
+
+        final Attempt saved = attemptRepository.save(tempAttempt);
+
+        final AttemptResult tempResult = AttemptResult.builder()
+                .attemptId(saved.getId())
+                .assessmentId(saved.getAssessment().getId())
+                .successCount(successCount)
+                .failureCount(failureCount)
+                .skippedCount(skippedCount)
+                .build();
+
+        attemptResultRepository.save(tempResult);
+
+        return Map.of(
+                "successCount", successCount,
+                "failureCount", failureCount,
+                "skippedCount", skippedCount,
+                "attempt", AttemptStatusDTO.fromEntity(saved, saved.getAssessment())
+        );
+    }
+
+    public AttemptResultDTO fetchResult(@Valid AttemptResultDTO reqdto, UUID id) {
+        final Attempt _attempt = attemptRepository.findById(reqdto.attemptId())
+                .orElseThrow(() -> new NotFoundException("ATTEMPT_NOT_FOUND"));
+
+        if (!_attempt.getExaminee().getId().equals(id))
+            throw new ConflictException("ATTEMPT_NOT_OWNED_BY_USER");
+
+        final AttemptResult _result = attemptResultRepository.findByAttemptId(reqdto.attemptId())
+                .orElseThrow(() -> new NotFoundException("ATTEMPT_RESULT_NOT_FOUND"));
+
+        if (!_result.getAssessmentId().equals(reqdto.assessmentId()))
+            throw new ConflictException("ATTEMPT_RESULT_NOT_OWNED_BY_ASSESSMENT");
+
+        return AttemptResultDTO.fromEntity(_result);
     }
 }
