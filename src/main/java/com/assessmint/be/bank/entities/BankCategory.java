@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,8 +29,13 @@ public class BankCategory {
 
     @OneToMany
     @Builder.Default
-    private List<Bank> banks = List.of();
+    private List<Bank> banks = new ArrayList<>();
 
     @CreatedDate
-    private LocalDateTime createdAt;
+    @Builder.Default
+    private LocalDateTime createdAt = LocalDateTime.now();
+
+    public void addBank(Bank saved) {
+        banks.add(saved);
+    }
 }

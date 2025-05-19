@@ -58,6 +58,8 @@ public class BankService {
                 .build();
 
         final Bank saved = bankRepository.save(temp);
+        bankCategory.addBank(saved);
+        bankCategoryRepository.save(bankCategory);
 
         return BankDTO.fromEntity(saved);
     }
