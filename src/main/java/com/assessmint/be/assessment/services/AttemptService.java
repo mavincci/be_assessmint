@@ -225,7 +225,7 @@ public class AttemptService {
         );
     }
 
-    public AttemptResultDTO fetchResult(@Valid Res reqdto, UUID id) {
+    public AttemptResultDTO fetchResult(@Valid AttemptResultDTO reqdto, UUID id) {
         final Attempt _attempt = attemptRepository.findById(reqdto.attemptId())
                 .orElseThrow(() -> new NotFoundException("ATTEMPT_NOT_FOUND"));
 

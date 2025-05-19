@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assessment Invitation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #dee2e6;
+        }
+        .content {
+            padding: 30px 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .assessment-details {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .important-note {
+            color: #dc3545;
+            font-weight: bold;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #6c757d;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>Assessment Invitation</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear <span th:text="${firstName}">First</span> <span th:text="${lastName}">Last</span>,</p>
+
+        <p>You have been invited to participate in an assessment by <span th:text="${assessmentName}">Company</span>.</p>
+
+        <div class="assessment-details">
+            <h3>Assessment Details:</h3>
+            <p><strong>Duration:</strong> <span th:text="${duration}">60 minutes</span></p>
+            <p><strong>Due Date:</strong> <span th:text="${dueDate}">January 30, 2024</span></p>
+        </div>
+
+        <p>To begin your assessment, please click the button below:</p>
+
+        <div style="text-align: center;">
+            <a th:href="${assessmentLink}" class="button">Start Assessment</a>
+        </div>
+
+        <p>If the button doesn't work, you can copy and paste this link into your browser:</p>
+        <p th:text="${assessmentLink}" style="word-break: break-all;"></p>
+
+        <div class="important-note">
+            <p>Important Notes:</p>
+            <ul>
+                <li>Please ensure you have a stable internet connection before starting</li>
+                <li>Once started, the assessment must be completed in one session</li>
+                <li>This link will expire on <span th:text="${dueDate}">January 30, 2024</span></li>
+            </ul>
+        </div>
+
+        <p>Tips for the assessment:</p>
+        <ul>
+            <li>Find a quiet place where you won't be disturbed</li>
+            <li>Make sure your device is fully charged</li>
+            <li>Read all questions carefully before answering</li>
+        </ul>
+
+        <p>If you experience any technical difficulties during the assessment, please contact our support team
+            immediately.</p>
+
+        <p>Best regards,<br>The Assessment Team</p>
+    </div>
+
+    <div class="footer">
+        <p>This email was sent to <span th:text="${receiverEmail}">email@example.com</span></p>
+        <p>© 2025 Assessmint. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>
