@@ -12,6 +12,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -45,7 +46,7 @@ public class Bank {
 
     @OneToMany
     @Builder.Default
-    private List<BankQuestion> questions = List.of();
+    private List<BankQuestion> questions = new ArrayList<>();
 
     @CreationTimestamp
     private LocalDateTime createdAt;

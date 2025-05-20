@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.Cascade;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.UUID;
@@ -59,7 +60,7 @@ public class Assessment {
     @JoinColumn(name = "assessment_id")
     @Builder.Default
     @Cascade(org.hibernate.annotations.CascadeType.ALL)
-    private List<AssessmentSection> sections = List.of();
+    private List<AssessmentSection> sections = new ArrayList<>();
 
     @PrePersist
     protected void onCreate() {

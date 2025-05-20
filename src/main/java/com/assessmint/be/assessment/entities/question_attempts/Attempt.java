@@ -8,6 +8,7 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -31,7 +32,7 @@ public class Attempt {
 
     @Builder.Default
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<QuestionAttempt> answers = Set.of();
+    private Set<QuestionAttempt> answers = new HashSet<>();
 
     @Builder.Default
     private Boolean isFinished = false;
