@@ -24,6 +24,7 @@ app:
   frontend:
     url: http://localhost:8080
   gemini:
+    model: gemini-2.0-flash
     api-key: AIzaSyBGFrKQt67qyUAgf5_3mfctiq19IQDFlRk
 
 springdoc:
