@@ -1,6 +1,8 @@
 package com.assessmint.be.assessment.dtos.question.q;
 
+import com.assessmint.be.assessment.dtos.question.mcq.QuestionMultipleChoiceDTO;
 import com.assessmint.be.assessment.dtos.question.tf.QuestionTrueFalseDTO;
+import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
 import com.assessmint.be.assessment.entities.questions.Question;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
 import com.assessmint.be.assessment.helpers.QuestionType;
@@ -22,7 +24,7 @@ public abstract class QuestionDTO {
     public static QuestionDTO fromEntity(Question entity) {
         return switch (entity.getQuestionType()) {
             case TRUE_OR_FALSE -> QuestionTrueFalseDTO.fromEntity((TrueFalseQuestion) entity);
-            case MULTIPLE_CHOICE -> null;
+            case MULTIPLE_CHOICE -> QuestionMultipleChoiceDTO.fromEntity((MultipleChoiceQuestion) entity);
         };
     }
 }
