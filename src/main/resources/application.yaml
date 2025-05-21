@@ -23,6 +23,8 @@ server:
 app:
   frontend:
     url: http://localhost:8080
+  gemini:
+    api-key: AIzaSyBGFrKQt67qyUAgf5_3mfctiq19IQDFlRk
 
 springdoc:
   api-docs:
