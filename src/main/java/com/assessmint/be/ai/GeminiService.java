@@ -1,17 +1,28 @@
 package com.assessmint.be.ai;
 
 import com.google.genai.Client;
+import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
+@Service
+@Getter
 public class GeminiService {
     @Value("${app.gemini.api-key}")
-    private static String apiKey;
+    private String apiKey;
 
     @Value("${app.gemini.model}")
-    private static String model;
+    private String model;
 
-    private static Client client = Client
-            .builder()
-            .apiKey(apiKey)
-            .build();
+    public Client client;
+
+    public Client getClient() {
+        if (client == null) {
+            client = Client
+                    .builder()
+                    .apiKey(apiKey)
+                    .build();
+        }
+        return client;
+    }
 }
