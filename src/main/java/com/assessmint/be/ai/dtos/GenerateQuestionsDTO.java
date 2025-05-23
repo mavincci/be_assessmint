@@ -3,7 +3,7 @@ package com.assessmint.be.ai.dtos;
 import jakarta.validation.constraints.*;
 import org.springframework.web.bind.annotation.RequestBody;
 
-public record GenerateTFQeustionsDTO(
+public record GenerateQuestionsDTO(
         @Size(min = 1, max = 100, message = "Message must be between 1 and 100 characters")
         @NotBlank @RequestBody String topic,
         @Positive(message = "Number of questions must be positive")

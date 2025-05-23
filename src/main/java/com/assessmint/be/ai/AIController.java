@@ -1,6 +1,7 @@
 package com.assessmint.be.ai;
 
-import com.assessmint.be.ai.dtos.GenerateTFQeustionsDTO;
+import com.assessmint.be.ai.dtos.GenerateQuestionsDTO;
+import com.assessmint.be.ai.dtos.GeneratedMCQDTO;
 import com.assessmint.be.global.controllers.dtos.APIResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.google.genai.Client;
@@ -91,13 +92,24 @@ public class AIController {
     }
 
     @PostMapping("/generate_tf")
-    public ResponseEntity<APIResponse<List<GenerateTFQeustionsDTO>>> generateTF(
-            @Valid @RequestBody GenerateTFQeustionsDTO reqdto
+    public ResponseEntity<APIResponse<List<GenerateQuestionsDTO>>> generateTF(
+            @Valid @RequestBody GenerateQuestionsDTO reqdto
     ) throws JsonProcessingException {
         return APIResponse.build(
                 HttpStatus.OK.value(),
                 "TF_QUESTIONS_GENERATION_SUCCESS",
-                aiService.prepare(reqdto)
+                aiService.generateTF(reqdto)
+        );
+    }
+
+    @PostMapping("/generate_mcq")
+    public ResponseEntity<APIResponse<List<GeneratedMCQDTO>>> generateMCQ(
+            @Valid @RequestBody GenerateQuestionsDTO reqdto
+    ) throws JsonProcessingException {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "MCQ_QUESTIONS_GENERATION_SUCCESS",
+                aiService.generateMCQ(reqdto)
         );
     }
 }
