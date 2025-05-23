@@ -5,6 +5,7 @@ import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSect
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
+import com.assessmint.be.assessment.dtos.question.AddQuestionFromBankDTO;
 import com.assessmint.be.assessment.dtos.question.q.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.q.QuestionDTO;
 import com.assessmint.be.assessment.dtos.question.mcq.QuestionMultipleChoiceDTO;
@@ -26,12 +27,20 @@ import com.assessmint.be.assessment.repositories.questions.MultipleChoiceQuestio
 import com.assessmint.be.assessment.repositories.questions.TrueFalseQuestionRepository;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.auth.entities.helpers.AuthRole;
+import com.assessmint.be.bank.entities.Bank;
+import com.assessmint.be.bank.entities.questions.BankMCQAnswer;
+import com.assessmint.be.bank.entities.questions.BankMultipleChoiceQuestion;
+import com.assessmint.be.bank.entities.questions.BankQuestion;
+import com.assessmint.be.bank.entities.questions.BankTrueFalseQuestion;
+import com.assessmint.be.bank.repositories.BankRepository;
+import com.assessmint.be.bank.repositories.questions.BankQuestionRepository;
 import com.assessmint.be.global.Utils;
 import com.assessmint.be.global.configurations.DateConstants;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
 import jakarta.transaction.Transactional;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -48,6 +57,8 @@ public class AssessmentService {
     private final AssessmentRepository assessmentRepository;
     private final AssessmentSectionRepository assessmentSectionRepository;
     private final AttemptRepository attemptRepository;
+    private final BankRepository bankRepository;
+    private final BankQuestionRepository bankQuestionRepository;
 
     private final TrueFalseQuestionRepository trueFalseQuestionRepository;
     private final MultipleChoiceQuestionRepository multipleChoiceQuestionRepository;
@@ -145,6 +156,56 @@ public class AssessmentService {
             case TRUE_OR_FALSE -> handleTrueFalseQuestion((AddTrueFalseQuestionDTO) reqDto, _section);
             case MULTIPLE_CHOICE -> handleMultipleChoiceQuestion((AddMultipleChoiceQuestionDTO) reqDto, _section);
         };
+    }
+
+    @Transactional
+    public QuestionDTO addQuestionFromBank(@Valid AddQuestionFromBankDTO reqDto, AuthUser user) {
+        final UUID sectionId = UUID.fromString(reqDto.sectionId());
+
+        final AssessmentSection section = assessmentSectionRepository.findById(sectionId)
+                .orElseThrow(() -> new NotFoundException("SECTION_NOT_FOUND"));
+        final Assessment assessment = section.getAssessment();
+
+        final UUID bankId = UUID.fromString(reqDto.bankId());
+
+        final Bank bank = bankRepository.findById(bankId)
+                .orElseThrow(() -> new NotFoundException("BANK_NOT_FOUND"));
+
+        if (bank.getQuestionType() != section.getQuestionType())
+            throw new ConflictException("BANK_SECTION_QUESTION_TYPE_MISMATCH");
+
+        final UUID questionId = UUID.fromString(reqDto.questionId());
+
+        final BankQuestion bankQuestion = bank.getQuestions().stream()
+                .filter(q -> q.getId().equals(questionId))
+                .findFirst()
+                .orElseThrow(() -> new NotFoundException("BANK_QUESTION_NOT_FOUND"));
+
+        if (bankQuestion.getQuestionType() == QuestionType.TRUE_OR_FALSE) {
+            final var question = (BankTrueFalseQuestion) bankQuestion;
+            return handleTrueFalseQuestion(
+                    new AddTrueFalseQuestionDTO(
+                            question.getQuestionText(),
+                            question.isAnswer() ? "true" : "false"
+                    ),
+                    section
+            );
+        } else if (bankQuestion.getQuestionType() == QuestionType.MULTIPLE_CHOICE) {
+            final var question = (BankMultipleChoiceQuestion) bankQuestion;
+            return handleMultipleChoiceQuestion(
+                    new AddMultipleChoiceQuestionDTO(
+                            question.getQuestionText(),
+                            question.getOptions().stream().map(BankMCQAnswer::getAnswerText).toList(),
+                            question.getOptions().stream()
+                                    .filter(o -> question.getAnswers().contains(o.getId()))
+                                    .map(BankMCQAnswer::getAnswerText)
+                                    .toList()
+                    ),
+                    section
+            );
+        }
+
+        return null;
     }
 
     public QuestionDTO handleTrueFalseQuestion(AddTrueFalseQuestionDTO reqDto, AssessmentSection _section) {
@@ -260,7 +321,7 @@ public class AssessmentService {
         }};
     }
 
-//    @PreAuthorize("hasRole('EXAMINEE')")
+    //    @PreAuthorize("hasRole('EXAMINEE')")
     public AttemptDTO startAssessment(StartAssessmentDTO reqDto, AuthUser user) {
         final var _assessment = _getAssessmentById(UUID.fromString(reqDto.assessmentId()));
 
@@ -343,4 +404,5 @@ public class AssessmentService {
 
         return SAssessmentDTO.fromEntity(assessment);
     }
+
 }
