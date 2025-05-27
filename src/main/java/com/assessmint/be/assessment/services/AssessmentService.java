@@ -90,8 +90,8 @@ public class AssessmentService {
         if (user.hasRole(AuthRole.ADMIN))
             return AssessmentDTO.fromEntity(_assessment);
 
-        if (!_assessment.getOwner().getId().equals(user.getId()))
-            throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
+        if (_assessment.getOwner().getId().equals(user.getId()))
+            return AssessmentDTO.fromEntity(_assessment);
 
         final Optional<Invitation> invitation = invitationRepository.findById(id);
 
