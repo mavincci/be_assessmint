@@ -1,5 +1,6 @@
 package com.assessmint.be.assessment.services;
 
+import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
 import com.assessmint.be.assessment.dtos.invitation.AddInvitationDTO;
 import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.assessment.entities.Invitation;
@@ -99,5 +100,16 @@ public class InvitationService {
                 "assessmentId", invitation.getAssessmentId(),
                 "emails", invitation.getEmails()
         );
+    }
+
+    public List<SAssessmentDTO> getMyInvitations(AuthUser user) {
+        final List<Invitation> invitations = invitationRepository.findAllByEmailsContaining(user.getEmail());
+
+        final List<Assessment> assessments = assessmentRepository
+                .findAllById(invitations.stream()
+                        .map(Invitation::getAssessmentId)
+                        .toList());
+
+        return assessments.stream().map(SAssessmentDTO::fromEntity).toList();
     }
 }

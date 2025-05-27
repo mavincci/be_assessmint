@@ -1,6 +1,7 @@
 package com.assessmint.be.assessment.controllers;
 
 
+import com.assessmint.be.assessment.dtos.assessment.SAssessmentDTO;
 import com.assessmint.be.assessment.dtos.invitation.AddInvitationDTO;
 import com.assessmint.be.assessment.services.InvitationService;
 import com.assessmint.be.auth.entities.AuthUser;
@@ -16,6 +17,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -46,6 +48,16 @@ public class InvitationController {
                 HttpStatus.OK.value(),
                 "GET_INVITED_SUCCESS",
                 invitationService.getInvited(java.util.UUID.fromString(assessmentId), user)
+        );
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<APIResponse<List<SAssessmentDTO>>> getMyInvitations(
+            @AuthenticationPrincipal AuthUser user) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "MY_INVITATIONS_FETCH_SUCCESS",
+                invitationService.getMyInvitations(user)
         );
     }
 }
