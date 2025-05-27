@@ -14,6 +14,7 @@ import com.assessmint.be.assessment.dtos.question.mcq.AddMultipleChoiceQuestionD
 import com.assessmint.be.assessment.dtos.question.tf.AddTrueFalseQuestionDTO;
 import com.assessmint.be.assessment.entities.Assessment;
 import com.assessmint.be.assessment.entities.AssessmentSection;
+import com.assessmint.be.assessment.entities.Invitation;
 import com.assessmint.be.assessment.entities.question_attempts.Attempt;
 import com.assessmint.be.assessment.entities.questions.MCQAnswer;
 import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
@@ -22,6 +23,7 @@ import com.assessmint.be.assessment.helpers.QuestionType;
 import com.assessmint.be.assessment.repositories.AssessmentRepository;
 import com.assessmint.be.assessment.repositories.AssessmentSectionRepository;
 import com.assessmint.be.assessment.repositories.AttemptRepository;
+import com.assessmint.be.assessment.repositories.InvitationRepository;
 import com.assessmint.be.assessment.repositories.questions.MCQAnswerRepository;
 import com.assessmint.be.assessment.repositories.questions.MultipleChoiceQuestionRepository;
 import com.assessmint.be.assessment.repositories.questions.TrueFalseQuestionRepository;
@@ -46,10 +48,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -59,6 +58,7 @@ public class AssessmentService {
     private final AttemptRepository attemptRepository;
     private final BankRepository bankRepository;
     private final BankQuestionRepository bankQuestionRepository;
+    private final InvitationRepository invitationRepository;
 
     private final TrueFalseQuestionRepository trueFalseQuestionRepository;
     private final MultipleChoiceQuestionRepository multipleChoiceQuestionRepository;
@@ -91,9 +91,18 @@ public class AssessmentService {
             return AssessmentDTO.fromEntity(_assessment);
 
         if (!_assessment.getOwner().getId().equals(user.getId()))
-            throw new NotAuthorizedException("NOT_AUTHORIZED");
+            throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
 
-        return AssessmentDTO.fromEntity(_assessment);
+        final Optional<Invitation> invitation = invitationRepository.findById(id);
+
+        if (_assessment.getIsPublic())
+            return AssessmentDTO.fromEntity(_assessment);
+
+        if (invitation.isPresent()
+                && invitation.get().getEmails().contains(user.getEmail()))
+            return AssessmentDTO.fromEntity(_assessment);
+
+        throw new NotAuthorizedException("ASSESSMENT_ACCESS_NOT_AUTHORIZED");
     }
 
     public SAssessmentSectionDTO addSection(CreateAssessmentSectionDTO reqDto, AuthUser user) {

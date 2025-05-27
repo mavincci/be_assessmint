@@ -1,5 +1,6 @@
 package com.assessmint.be.assessment.entities;
 
+import jakarta.persistence.ElementCollection;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.AllArgsConstructor;
@@ -21,6 +22,7 @@ public class Invitation {
     @Id
     private UUID assessmentId;
 
+    @ElementCollection
     @Builder.Default
     private Set<String> emails = new HashSet<>();
 
