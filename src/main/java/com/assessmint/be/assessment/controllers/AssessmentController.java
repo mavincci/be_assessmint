@@ -5,6 +5,7 @@ import com.assessmint.be.assessment.dtos.assessment_section.CreateAssessmentSect
 import com.assessmint.be.assessment.dtos.assessment_section.SAssessmentSectionDTO;
 import com.assessmint.be.assessment.dtos.attempt.AttemptDTO;
 import com.assessmint.be.assessment.dtos.attempt.StartAssessmentDTO;
+import com.assessmint.be.assessment.dtos.question.AddQuestionFromBankDTO;
 import com.assessmint.be.assessment.dtos.question.q.AddQuestionDTO;
 import com.assessmint.be.assessment.dtos.question.q.QuestionDTO;
 import com.assessmint.be.assessment.services.AssessmentService;
@@ -138,6 +139,18 @@ public class AssessmentController {
                 HttpStatus.CREATED.value(),
                 "ASSESSMENT_QUESTION_ADD_SUCCESS",
                 assessmentService.addQuestion(reqDto, user)
+        );
+    }
+
+    @PostMapping("/add_from_bank")
+    public ResponseEntity<APIResponse<QuestionDTO>> addQuestionFromBank(
+            @Valid @RequestBody AddQuestionFromBankDTO reqDto,
+            @AuthenticationPrincipal AuthUser user
+    ) {
+        return APIResponse.build(
+                HttpStatus.CREATED.value(),
+                "QUESTION_ADD_FROM_BANK_SUCCESS",
+                assessmentService.addQuestionFromBank(reqDto, user)
         );
     }
 

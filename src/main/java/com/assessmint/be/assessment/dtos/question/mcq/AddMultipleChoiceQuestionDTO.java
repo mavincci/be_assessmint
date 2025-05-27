@@ -5,12 +5,14 @@ import com.assessmint.be.assessment.helpers.QuestionType;
 import jakarta.validation.constraints.AssertTrue;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.HashSet;
 import java.util.List;
 
 @Getter
+@AllArgsConstructor
 public class AddMultipleChoiceQuestionDTO extends AddQuestionDTO {
     @NotBlank
     private String questionText;
