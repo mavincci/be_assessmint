@@ -4,15 +4,16 @@ import com.assessmint.be.assessment.dtos.attempt.AttemptResultDTO;
 import com.assessmint.be.assessment.services.AttemptService;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.controllers.dtos.APIResponse;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+import org.hibernate.validator.constraints.UUID;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/assessments/attempts/result")
@@ -20,14 +21,27 @@ import org.springframework.web.bind.annotation.RestController;
 public class AttemptResultController {
     private final AttemptService attemptService;
 
-    @PostMapping("/fetch_result")
+    @GetMapping("/fetch_result/{assessmentId}")
     public ResponseEntity<APIResponse<AttemptResultDTO>> processResult(
-            @Valid @RequestBody AttemptResultDTO reqdto,
+            @Validated @NotBlank @UUID
+            @PathVariable("assessmentId") String assessmentId,
             @AuthenticationPrincipal AuthUser user) {
         return APIResponse.build(
                 HttpStatus.OK.value(),
                 "RESULT_FETCH_SUCCESS",
-                attemptService.fetchResult(reqdto, user.getId())
+                attemptService.fetchResult(java.util.UUID.fromString(assessmentId), user)
+        );
+    }
+
+    @GetMapping("/fetch_results/{assessmentId}")
+    public ResponseEntity<APIResponse<List<AttemptResultDTO>>> fetchResults(
+            @Validated @NotBlank @UUID
+            @PathVariable("assessmentId") String assessmentId,
+            @AuthenticationPrincipal AuthUser user) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "RESULT_FETCH_SUCCESS",
+                attemptService.fetchResults(java.util.UUID.fromString(assessmentId), user)
         );
     }
 }

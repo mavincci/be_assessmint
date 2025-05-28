@@ -10,10 +10,7 @@ import com.assessmint.be.assessment.entities.questions.MultipleChoiceQuestion;
 import com.assessmint.be.assessment.entities.questions.Question;
 import com.assessmint.be.assessment.entities.question_attempts.TrueFalseAttempt;
 import com.assessmint.be.assessment.entities.questions.TrueFalseQuestion;
-import com.assessmint.be.assessment.repositories.AssessmentSectionRepository;
-import com.assessmint.be.assessment.repositories.AttemptRepository;
-import com.assessmint.be.assessment.repositories.AttemptResultRepository;
-import com.assessmint.be.assessment.repositories.QuestionRepository;
+import com.assessmint.be.assessment.repositories.*;
 import com.assessmint.be.assessment.repositories.question_attempts.MCQAttemptRepository;
 import com.assessmint.be.assessment.repositories.question_attempts.TrueFalseAttemptRepository;
 import com.assessmint.be.assessment.repositories.questions.MCQAnswerRepository;
@@ -40,6 +37,7 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class AttemptService {
+    private final AssessmentRepository assessmentRepoisitory;
     private final AssessmentSectionRepository sectionRepository;
     private final QuestionRepository questionRepository;
     private final TrueFalseQuestionRepository trueFalseQuestionRepository;
@@ -263,19 +261,30 @@ public class AttemptService {
         );
     }
 
-    public AttemptResultDTO fetchResult(@Valid AttemptResultDTO reqdto, UUID id) {
-        final Attempt _attempt = attemptRepository.findById(reqdto.attemptId())
+    public AttemptResultDTO fetchResult(@Valid UUID assessmentId, AuthUser user) {
+        final Attempt _attempt = attemptRepository
+                .findFirstByAssessmentIdOrderByCreatedAtDesc(assessmentId)
                 .orElseThrow(() -> new NotFoundException("ATTEMPT_NOT_FOUND"));
 
-        if (!_attempt.getExaminee().getId().equals(id))
+        if (!_attempt.getExaminee().getId().equals(user.getId()))
             throw new ConflictException("ATTEMPT_NOT_OWNED_BY_USER");
 
-        final AttemptResult _result = attemptResultRepository.findByAttemptId(reqdto.attemptId())
+        final AttemptResult _result = attemptResultRepository.findByAttemptId(_attempt.getId())
                 .orElseThrow(() -> new NotFoundException("ATTEMPT_RESULT_NOT_FOUND"));
 
-        if (!_result.getAssessmentId().equals(reqdto.assessmentId()))
-            throw new ConflictException("ATTEMPT_RESULT_NOT_OWNED_BY_ASSESSMENT");
-
         return AttemptResultDTO.fromEntity(_result);
+    }
+
+    public List<AttemptResultDTO> fetchResults(UUID assessmentId, AuthUser user) {
+        final var assessment = assessmentRepoisitory.findById(assessmentId)
+                .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_FOUND"));
+
+        if (assessment.getOwner().getId() == null || !assessment.getOwner().getId().equals(user.getId())) {
+            throw new ConflictException("ASSESSMENT_NOT_OWNED_BY_USER");
+        }
+
+        final var results = attemptResultRepository.findAllByAssessmentId(assessmentId);
+
+        return results.stream().map(AttemptResultDTO::fromEntity).toList();
     }
 }
