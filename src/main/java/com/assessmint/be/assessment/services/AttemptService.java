@@ -20,8 +20,12 @@ import com.assessmint.be.assessment.repositories.questions.MCQAnswerRepository;
 import com.assessmint.be.assessment.repositories.questions.TrueFalseQuestionRepository;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.Utils;
+import com.assessmint.be.global.configurations.DateConstants;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import com.assessmint.be.notification.EmailService;
+import com.assessmint.be.notification.EmailTemplate;
+import jakarta.mail.MessagingException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,6 +48,8 @@ public class AttemptService {
     private final MCQAttemptRepository mcqAttemptRepository;
     private final MCQAnswerRepository mcqAnswerRepository;
     private final AttemptResultRepository attemptResultRepository;
+
+    private final EmailService emailService;
 
     //    @PreAuthorize("hasRole('EXAMINEE')")
     public AttemptStatusDTO doAnswer(DoAnswerDTO reqDto, AuthUser user) {
@@ -142,7 +148,7 @@ public class AttemptService {
     }
 
     @Transactional
-    public Map<String, Object> finishAssessment(@Valid FinishDTO reqdto, AuthUser user) {
+    public Map<String, Object> finishAssessment(@Valid FinishDTO reqdto, AuthUser user) throws MessagingException {
         final UUID assessmentId = UUID.fromString(reqdto.assessmentId());
 
         final Attempt tempAttempt = attemptRepository
@@ -217,11 +223,43 @@ public class AttemptService {
 
         attemptResultRepository.save(tempResult);
 
+        sendResultEmail(
+                user, successCount, failureCount, skippedCount,
+                DateConstants.localDateFmtr.format(tempResult.getCreatedAt()),
+                tempAttempt.getAssessment().getTitle()
+        );
+
         return Map.of(
                 "successCount", successCount,
                 "failureCount", failureCount,
                 "skippedCount", skippedCount,
                 "attempt", AttemptStatusDTO.fromEntity(saved, saved.getAssessment())
+        );
+    }
+
+    public void sendResultEmail(
+            AuthUser recipient,
+            int successCount,
+            int failureCount,
+            int skippedCount,
+            String dateCompleted,
+            String assessmentTitle
+    ) throws MessagingException {
+        emailService.sendTemplated(
+                recipient.getEmail(),
+                "Assessment Result",
+                EmailTemplate.RESULT_ANNOUNCEMENT.templateName,
+                Map.of(
+                        "recipientEmail", recipient.getEmail(),
+                        "candidateName", String.format("%s %s", recipient.getFirstName(), recipient.getLastName()),
+                        "successCount", successCount,
+                        "failureCount", failureCount,
+                        "skippedCount", skippedCount,
+                        "dateCompleted", dateCompleted,
+                        "timeTaken", 10,
+                        "totalQuestions", successCount + failureCount + skippedCount,
+                        "assessmentTitle", assessmentTitle
+                )
         );
     }
 

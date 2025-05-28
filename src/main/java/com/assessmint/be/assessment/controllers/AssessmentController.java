@@ -12,6 +12,7 @@ import com.assessmint.be.assessment.services.AssessmentService;
 import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.controllers.dtos.APIResponse;
 import com.assessmint.be.global.controllers.validators.ValidUUID;
+import com.assessmint.be.notification.EmailService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
 import jakarta.validation.Valid;
@@ -36,6 +37,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AssessmentController {
     private final AssessmentService assessmentService;
+    private final EmailService emailService;
 
     @PostMapping("/create")
     public ResponseEntity<APIResponse<SAssessmentDTO>> createAssessment(

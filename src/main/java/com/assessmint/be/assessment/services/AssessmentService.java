@@ -41,6 +41,8 @@ import com.assessmint.be.global.configurations.DateConstants;
 import com.assessmint.be.global.exceptions.ConflictException;
 import com.assessmint.be.global.exceptions.NotAuthorizedException;
 import com.assessmint.be.global.exceptions.NotFoundException;
+import com.assessmint.be.notification.EmailService;
+import com.assessmint.be.notification.EmailTemplate;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -63,6 +65,7 @@ public class AssessmentService {
     private final TrueFalseQuestionRepository trueFalseQuestionRepository;
     private final MultipleChoiceQuestionRepository multipleChoiceQuestionRepository;
     private final MCQAnswerRepository mcqAnswerRepository;
+    private final EmailService emailService;
 
     public SAssessmentDTO create(
             CreateAssessmentDTO reqDto,

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Assessment Results</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #dee2e6;
+        }
+
+        .content {
+            padding: 20px;
+            background-color: #ffffff;
+        }
+
+        .result-summary {
+            background-color: #f1f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+
+        .score {
+            font-size: 24px;
+            font-weight: bold;
+            color: #0066cc;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 20px;
+            font-size: 12px;
+            color: #666666;
+        }
+
+        .button {
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #0066cc;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+<div class="email-container">
+    <div class="header">
+        <h1>Assessment Results</h1>
+    </div>
+
+    <div class="content">
+        <p>Dear <span th:text="${candidateName}"></span>,</p>
+
+        <p>Thank you for completing the assessment. Here are your results:</p>
+
+        <div class="result-summary">
+            <div class="score">
+                Score: <span th:text="${successCount}"></span> / <span th:text="${totalQuestions}"></span>
+            </div>
+            <p><strong>Assessment: </strong><span th:text="${assessmentTitle}"></span></p>
+            <p><strong>Date Completed: </strong><span th:text="${dateCompleted}"></span></p>
+            <p><strong>Time Taken: </strong><span th:text="${timeTaken}"></span></p>
+        </div>
+
+        <p>Performance Summary:</p>
+        <ul>
+            <li>Correct Answers: <span th:text="${successCount}"></span></li>
+            <li>Unattempted Answers: <span th:text="${skippedCount}"></span></li>
+            <li>Total Questions: <span th:text="${totalQuestions}"></span></li>
+        </ul>
+
+        <p>You can view your detailed results by clicking the button below:</p>
+        <div style="text-align: center;">
+            <a href="[Results Link]" class="button">View Detailed Results</a>
+        </div>
+
+        <p>If you have any questions about your results, please don't hesitate to contact us.</p>
+
+        <p>Best regards,<br>Assessmint Team</p>
+    </div>
+
+    <div class="footer">
+        <p>This email was sent to <span th:text="${recipientEmail}">email@example.com</span></p>
+        <p>© 2025 Assessmint. All rights reserved.</p>
+    </div>
+</div>
+</body>
+</html>

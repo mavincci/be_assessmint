@@ -1,10 +1,136 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-    <title>Welcome</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Assessmint</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .email-container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background-color: #2E7D32;
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .logo {
+            margin-bottom: 20px;
+            max-width: 150px;
+        }
+        .content {
+            padding: 30px;
+            background-color: #ffffff;
+        }
+        .welcome-message {
+            font-size: 24px;
+            color: #2E7D32;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .next-steps {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        .next-steps h2 {
+            color: #2E7D32;
+            margin-top: 0;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #2E7D32;
+            color: #ffffff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .footer {
+            text-align: center;
+            padding: 20px;
+            background-color: #f8f9fa;
+            color: #666666;
+            font-size: 12px;
+        }
+        .social-links {
+            margin: 20px 0;
+        }
+        .social-links a {
+            margin: 0 10px;
+            color: #2E7D32;
+            text-decoration: none;
+        }
+        @media only screen and (max-width: 600px) {
+            .email-container {
+                width: 100%;
+                border-radius: 0;
+            }
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
 </head>
 <body>
-<h1>Welcome, <span th:text="${firstName}"></span> <span th:text="${lastName}"></span>!</h1>
-<p>2025 Assessmint.</p>
+    <div class="email-container">
+        <div class="header">
+            <!-- If you have a logo, uncomment and add the logo path -->
+            <!-- <img class="logo" src="logo-path" alt="Assessmint Logo"> -->
+            <h1>Welcome to Assessmint</h1>
+        </div>
+
+        <div class="content">
+            <div class="welcome-message">
+                Welcome, <span th:text="${firstName}">John</span> <span th:text="${lastName}">Doe</span>!
+            </div>
+
+            <p>We're excited to have you join our platform. Assessmint is your gateway to showcasing your skills and advancing your career through professional assessments.</p>
+
+            <div class="next-steps">
+                <h2>Getting Started</h2>
+                <ul>
+                    <li>Complete your profile</li>
+                    <li>Browse available assessments</li>
+                    <li>Take practice tests</li>
+                    <li>Schedule your first assessment</li>
+                </ul>
+            </div>
+
+            <center>
+                <a href="#" class="button">Get Started Now</a>
+            </center>
+
+            <p>If you have any questions or need assistance, our support team is here to help. Just reply to this email.</p>
+
+            <p>Best regards,<br>The Assessmint Team</p>
+        </div>
+
+        <div class="footer">
+            <div class="social-links">
+                <!-- Add your social media links here -->
+                <a href="#">Twitter</a> |
+                <a href="#">LinkedIn</a> |
+                <a href="#">Facebook</a>
+            </div>
+            <p>© 2025 Assessmint. All rights reserved.</p>
+            <p>You're receiving this email because you signed up for an Assessmint account.</p>
+        </div>
+    </div>
 </body>
 </html>

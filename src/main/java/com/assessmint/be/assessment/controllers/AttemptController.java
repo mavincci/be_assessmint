@@ -9,6 +9,7 @@ import com.assessmint.be.auth.entities.AuthUser;
 import com.assessmint.be.global.controllers.dtos.APIResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.tags.Tags;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -57,7 +58,7 @@ public class AttemptController {
     public ResponseEntity<APIResponse<Map<String, Object>>> finishAssessment(
             @Valid @RequestBody FinishDTO reqdto,
             @AuthenticationPrincipal AuthUser user
-    ) {
+    ) throws MessagingException {
         return APIResponse.build(
                 HttpStatus.OK.value(),
                 "ASSESSMENT_FINISHED_SUCCESS",
