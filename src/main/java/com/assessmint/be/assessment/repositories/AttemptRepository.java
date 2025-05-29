@@ -21,4 +21,6 @@ public interface AttemptRepository extends JpaRepository<Attempt, UUID> {
 
     Optional<Attempt> findFirstByAssessmentIdAndExamineeOrderByCreatedAtDesc(
             UUID assessmentId, AuthUser examinee);
+
+    Optional<Attempt> findFirstByAssessmentIdAndExamineeAndIsFinishedFalseOrderByCreatedAtDesc(UUID assessment_id, AuthUser examinee);
 }

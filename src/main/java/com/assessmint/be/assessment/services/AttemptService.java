@@ -149,11 +149,17 @@ public class AttemptService {
     public Map<String, Object> finishAssessment(@Valid FinishDTO reqdto, AuthUser user) throws MessagingException {
         final UUID assessmentId = UUID.fromString(reqdto.assessmentId());
 
+        // Retrieve the Attempt with a pessimistic lock
         final Attempt tempAttempt = attemptRepository
-                .findFirstByAssessmentIdAndExamineeOrderByCreatedAtDesc(
-                        assessmentId, user)
+                .findFirstByAssessmentIdAndExamineeAndIsFinishedFalseOrderByCreatedAtDesc(assessmentId, user)
                 .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_STARTED_YET"));
 
+        // Optional: Double-check the state (though the lock should ensure exclusivity)
+        if (tempAttempt.getIsFinished()) {
+            throw new IllegalStateException("Assessment already finished");
+        }
+
+        // Process answers to calculate results
         final List<Question> questions = tempAttempt.getAssessment()
                 .getSections()
                 .stream()
@@ -189,7 +195,6 @@ public class AttemptService {
                     final var mcqQuestion = (MultipleChoiceQuestion) question.get();
 
                     final var correctAnswers = mcqQuestion.getAnswers();
-
                     final var isCorrect = new HashSet<>(correctAnswers).containsAll(mcqAns.getAnswers());
 
                     if (isCorrect)
@@ -201,35 +206,26 @@ public class AttemptService {
             }
         }
 
-
         System.out.println("Success: " + successCount);
         System.out.println("Failed: " + failureCount);
         System.out.println("Skipped: " + skippedCount);
 
+        // Update and save the Attempt
         tempAttempt.setIsFinished(true);
         tempAttempt.setFinishedAt(LocalDateTime.now());
-
         final Attempt saved = attemptRepository.save(tempAttempt);
-        Optional<AttemptResult> existingResultOpt = attemptResultRepository.findByAttemptId(saved.getId());
 
-        AttemptResult tempResult;
-        if (existingResultOpt.isPresent()) {
-            tempResult = existingResultOpt.get();
-            tempResult.setSuccessCount(successCount);
-            tempResult.setFailureCount(failureCount);
-            tempResult.setSkippedCount(skippedCount);
-        } else {
-            tempResult = AttemptResult.builder()
-                    .attemptId(saved.getId())
-                    .assessmentId(saved.getAssessment().getId())
-                    .successCount(successCount)
-                    .failureCount(failureCount)
-                    .skippedCount(skippedCount)
-                    .build();
-        }
-
+        // Create and save the AttemptResult
+        final AttemptResult tempResult = AttemptResult.builder()
+                .attemptId(saved.getId())
+                .assessmentId(saved.getAssessment().getId())
+                .successCount(successCount)
+                .failureCount(failureCount)
+                .skippedCount(skippedCount)
+                .build();
         attemptResultRepository.save(tempResult);
 
+        // Send email and return response
         sendResultEmail(
                 user, successCount, failureCount, skippedCount,
                 DateConstants.localDateFmtr.format(tempResult.getCreatedAt()),
