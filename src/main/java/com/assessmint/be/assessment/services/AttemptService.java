@@ -272,7 +272,7 @@ public class AttemptService {
         final AttemptResult _result = attemptResultRepository.findByAttemptId(_attempt.getId())
                 .orElseThrow(() -> new NotFoundException("ATTEMPT_RESULT_NOT_FOUND"));
 
-        return AttemptResultDTO.fromEntity(_result);
+        return AttemptResultDTO.fromEntity(_result, _attempt.getExaminee());
     }
 
     public List<AttemptResultDTO> fetchResults(UUID assessmentId, AuthUser user) {
@@ -283,8 +283,20 @@ public class AttemptService {
             throw new ConflictException("ASSESSMENT_NOT_OWNED_BY_USER");
         }
 
-        final var results = attemptResultRepository.findAllByAssessmentId(assessmentId);
+        final List<AttemptResult> results = attemptResultRepository.findAllByAssessmentId(assessmentId);
 
-        return results.stream().map(AttemptResultDTO::fromEntity).toList();
+        final List<Attempt> attempts = attemptRepository.findAllById(
+                results.stream().map(AttemptResult::getAttemptId).toList()
+        );
+
+        return results.stream().map(
+                r -> {
+                    final Optional<Attempt> tempA = attempts.stream()
+                            .filter(a -> a.getId().equals(r.getAttemptId()))
+                            .findFirst();
+
+                    return AttemptResultDTO.fromEntity(r, tempA.get().getExaminee());
+                }
+        ).toList();
     }
 }
