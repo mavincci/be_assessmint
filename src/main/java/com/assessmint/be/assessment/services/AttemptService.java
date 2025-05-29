@@ -210,14 +210,23 @@ public class AttemptService {
         tempAttempt.setFinishedAt(LocalDateTime.now());
 
         final Attempt saved = attemptRepository.save(tempAttempt);
+        Optional<AttemptResult> existingResultOpt = attemptResultRepository.findByAttemptId(saved.getId());
 
-        final AttemptResult tempResult = AttemptResult.builder()
-                .attemptId(saved.getId())
-                .assessmentId(saved.getAssessment().getId())
-                .successCount(successCount)
-                .failureCount(failureCount)
-                .skippedCount(skippedCount)
-                .build();
+        AttemptResult tempResult;
+        if (existingResultOpt.isPresent()) {
+            tempResult = existingResultOpt.get();
+            tempResult.setSuccessCount(successCount);
+            tempResult.setFailureCount(failureCount);
+            tempResult.setSkippedCount(skippedCount);
+        } else {
+            tempResult = AttemptResult.builder()
+                    .attemptId(saved.getId())
+                    .assessmentId(saved.getAssessment().getId())
+                    .successCount(successCount)
+                    .failureCount(failureCount)
+                    .skippedCount(skippedCount)
+                    .build();
+        }
 
         attemptResultRepository.save(tempResult);
 
