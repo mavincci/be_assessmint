@@ -19,6 +19,7 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -141,6 +142,15 @@ public class AppAuthController {
                 HttpStatus.OK.value(),
                 "PASSWORD_CHANGE_SUCCESS",
                 null
+        );
+    }
+
+    @GetMapping("/get_all_users")
+    public ResponseEntity<APIResponse<List<AuthUserDTO>>> getAllUsers() {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "ALL_USERS_FETCH_SUCCESS",
+                authUserService.getAllUsers()
         );
     }
 }
