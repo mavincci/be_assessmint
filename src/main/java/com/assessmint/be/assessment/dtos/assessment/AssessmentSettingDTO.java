@@ -11,6 +11,7 @@ public record AssessmentSettingDTO(
         LocalDateTime endDateTIme,
         Integer duration,
         Integer maxAttempts,
+        Double passingScore,
         Boolean isPublic
 ) {
     public static AssessmentSettingDTO fromEntity(Assessment entity) {
@@ -20,6 +21,7 @@ public record AssessmentSettingDTO(
                 entity.getEndDateTime(),
                 entity.getDuration(),
                 entity.getMaxAttempts(),
+                entity.getPassingScore(),
                 entity.getIsPublic()
         );
     }

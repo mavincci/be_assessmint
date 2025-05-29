@@ -305,6 +305,12 @@ public class AssessmentService {
         _assessment.setEndDateTime(endDateTime);
         _assessment.setDuration(duration);
         _assessment.setMaxAttempts(maxAttempts);
+
+        if (reqDto.passingScore() == null)
+            _assessment.setPassingScore(0.0);
+        else
+            _assessment.setPassingScore(reqDto.passingScore());
+
         _assessment.setIsPublic(isPublic);
 
         final var saved = assessmentRepository.save(_assessment);

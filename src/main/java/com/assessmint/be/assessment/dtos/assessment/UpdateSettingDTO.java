@@ -3,6 +3,7 @@ package com.assessmint.be.assessment.dtos.assessment;
 import com.assessmint.be.global.controllers.validators.ValidBoolean;
 import com.assessmint.be.global.controllers.validators.ValidDateTime;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import org.hibernate.validator.constraints.UUID;
 
@@ -26,6 +27,9 @@ public record UpdateSettingDTO(
         @NotBlank
         @PositiveOrZero
         String maxAttempts,
+
+        @Positive
+        Double passingScore,
 
         @NotBlank
         @ValidBoolean

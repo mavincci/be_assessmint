@@ -6,6 +6,7 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.GenerationType;
 import lombok.*;
 import org.hibernate.annotations.Cascade;
+import org.hibernate.annotations.ColumnDefault;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,6 +53,10 @@ public class Assessment {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    @Builder.Default
+    @ColumnDefault("0.0")
+    private Double passingScore = 0.0;
 
     @ManyToOne
     private AuthUser owner;
