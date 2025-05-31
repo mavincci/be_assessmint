@@ -219,6 +219,7 @@ public class AttemptService {
         final AttemptResult tempResult = AttemptResult.builder()
                 .attemptId(savedAttempt.getId())
                 .assessmentId(savedAttempt.getAssessment().getId())
+                .examineeId(user.getId())
                 .successCount(successCount)
                 .failureCount(failureCount)
                 .skippedCount(skippedCount)
@@ -297,5 +298,12 @@ public class AttemptService {
                     return AttemptResultDTO.fromEntity(r, tempA.get().getExaminee());
                 }
         ).toList();
+    }
+
+    public List<AttemptResultNoUserDTO> fetchMyResult(UUID uuid, AuthUser user) {
+        final List<AttemptResult> results = attemptResultRepository
+                .findAllByAssessmentIdAndExamineeId(uuid, user.getId());
+
+        return results.stream().map(AttemptResultNoUserDTO::fromEntity).toList();
     }
 }

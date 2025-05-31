@@ -12,5 +12,7 @@ public interface AttemptResultRepository extends JpaRepository<AttemptResult, UU
 
     List<AttemptResult> findAllByAssessmentId(UUID assessmentId);
 
+    List<AttemptResult> findAllByAssessmentIdAndExamineeId(UUID assessmentId, UUID examineeId);
+
     Optional<AttemptResult> findFirstByAssessmentIdOrderByCreatedAtDesc(UUID assessmentId);
 }
