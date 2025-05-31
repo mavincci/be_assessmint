@@ -17,6 +17,9 @@ import java.util.UUID;
 public class AttemptResult {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
+    @Column(unique = true)
     private UUID attemptId;
 
     private UUID assessmentId;
