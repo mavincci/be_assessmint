@@ -24,6 +24,8 @@ public class AttemptResult {
 
     private UUID assessmentId;
 
+    private UUID examineeId;
+
     @Builder.Default
     private int successCount = 0;
 
