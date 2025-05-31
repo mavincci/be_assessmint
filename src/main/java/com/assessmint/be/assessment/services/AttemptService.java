@@ -213,12 +213,12 @@ public class AttemptService {
         // Update and save the Attempt
         tempAttempt.setIsFinished(true);
         tempAttempt.setFinishedAt(LocalDateTime.now());
-        final Attempt saved = attemptRepository.save(tempAttempt);
+        final Attempt savedAttempt = attemptRepository.save(tempAttempt);
 
         // Create and save the AttemptResult
         final AttemptResult tempResult = AttemptResult.builder()
-                .attemptId(saved.getId())
-                .assessmentId(saved.getAssessment().getId())
+                .attemptId(savedAttempt.getId())
+                .assessmentId(savedAttempt.getAssessment().getId())
                 .successCount(successCount)
                 .failureCount(failureCount)
                 .skippedCount(skippedCount)
@@ -236,7 +236,7 @@ public class AttemptService {
                 "successCount", successCount,
                 "failureCount", failureCount,
                 "skippedCount", skippedCount,
-                "attempt", AttemptStatusDTO.fromEntity(saved, saved.getAssessment())
+                "attempt", AttemptStatusDTO.fromEntity(savedAttempt, savedAttempt.getAssessment())
         );
     }
 
@@ -267,17 +267,17 @@ public class AttemptService {
     }
 
     public AttemptResultDTO fetchResult(@Valid UUID assessmentId, AuthUser user) {
-        final Attempt _attempt = attemptRepository
-                .findFirstByAssessmentIdOrderByCreatedAtDesc(assessmentId)
-                .orElseThrow(() -> new NotFoundException("ATTEMPT_NOT_FOUND"));
+        final Attempt attempt = attemptRepository
+                .findFirstByAssessmentIdAndIsFinishedIsTrue(assessmentId)
+                .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_FINISHED_YET"));
 
-        if (!_attempt.getExaminee().getId().equals(user.getId()))
+        if (!attempt.getExaminee().getId().equals(user.getId()))
             throw new ConflictException("ATTEMPT_NOT_OWNED_BY_USER");
 
-        final AttemptResult _result = attemptResultRepository.findByAttemptId(_attempt.getId())
+        final AttemptResult _result = attemptResultRepository.findByAttemptId(attempt.getId())
                 .orElseThrow(() -> new NotFoundException("ATTEMPT_RESULT_NOT_FOUND"));
 
-        return AttemptResultDTO.fromEntity(_result, _attempt.getExaminee());
+        return AttemptResultDTO.fromEntity(_result, attempt.getExaminee());
     }
 
     public List<AttemptResultDTO> fetchResults(UUID assessmentId, AuthUser user) {
