@@ -267,17 +267,11 @@ public class AttemptService {
     }
 
     public AttemptResultDTO fetchResult(@Valid UUID assessmentId, AuthUser user) {
-        final Attempt attempt = attemptRepository
-                .findFirstByAssessmentIdAndIsFinishedIsTrue(assessmentId)
-                .orElseThrow(() -> new NotFoundException("ASSESSMENT_NOT_FINISHED_YET"));
-
-        if (!attempt.getExaminee().getId().equals(user.getId()))
-            throw new ConflictException("ATTEMPT_NOT_OWNED_BY_USER");
-
-        final AttemptResult _result = attemptResultRepository.findByAttemptId(attempt.getId())
+        final AttemptResult result = attemptResultRepository
+                .findFirstByAssessmentIdOrderByCreatedAtDesc(assessmentId)
                 .orElseThrow(() -> new NotFoundException("ATTEMPT_RESULT_NOT_FOUND"));
 
-        return AttemptResultDTO.fromEntity(_result, attempt.getExaminee());
+        return AttemptResultDTO.fromEntity(result, user);
     }
 
     public List<AttemptResultDTO> fetchResults(UUID assessmentId, AuthUser user) {
