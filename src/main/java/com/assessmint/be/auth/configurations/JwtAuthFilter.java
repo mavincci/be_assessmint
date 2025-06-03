@@ -21,62 +21,71 @@ import java.io.IOException;
 @RequiredArgsConstructor
 public class JwtAuthFilter extends OncePerRequestFilter {
 
-   private final JwtUtils jwtUtils;
-   private final AuthUserDetailService authUserDetailService;
+    private final JwtUtils jwtUtils;
+    private final AuthUserDetailService authUserDetailService;
 
-   @Override
-   protected void doFilterInternal(
-         HttpServletRequest request,
-         HttpServletResponse response,
-         FilterChain filterChain) throws ServletException, IOException {
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request,
+            HttpServletResponse response,
+            FilterChain filterChain) throws ServletException, IOException {
 
-      final var reqPath = request.getRequestURI();
+        final var reqPath = request.getRequestURI();
 
-      final String authHeader = request.getHeader("Authorization");
+        final String authHeader = request.getHeader("Authorization");
 
-      if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
-         filterChain.doFilter(request, response);
-         return;
-      }
+        if (authHeader == null || authHeader.isBlank() || !authHeader.startsWith("Bearer ")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
-      final var jwtToken = authHeader.substring(7);
+        final var jwtToken = authHeader.substring(7);
 
-      String userEmail;
+        String userEmail;
 
-      try {
-         userEmail = jwtUtils.extractUsername(jwtToken);
-      } catch (ExpiredJwtException e) {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-         response.setContentType("application/json");
-         response.getWriter().write("{\"statusCode\": 401, \"message\": \"AUTH_TOKEN_EXPIRED\"}");
-         response.getWriter().flush();
-         response.getWriter().close();
-         return;
-      }catch (MalformedJwtException e) {
-         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-         response.setContentType("application/json");
-         response.getWriter().write("{\"statusCode\": 401, \"message\": \"AUTH_TOKEN_INVALID\"}");
-         response.getWriter().flush();
-         response.getWriter().close();
-         return;
-      }
+        try {
+            userEmail = jwtUtils.extractUsername(jwtToken);
+        } catch (ExpiredJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"statusCode\": 401, \"message\": \"AUTH_TOKEN_EXPIRED\"}");
+            response.getWriter().flush();
+            response.getWriter().close();
+            return;
+        } catch (MalformedJwtException e) {
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json");
+            response.getWriter().write("{\"statusCode\": 401, \"message\": \"AUTH_TOKEN_INVALID\"}");
+            response.getWriter().flush();
+            response.getWriter().close();
+            return;
+        }
 
-      if (!userEmail.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
-         final var userDetails = authUserDetailService.loadUserByUsername(userEmail);
+        if (!userEmail.isEmpty() && SecurityContextHolder.getContext().getAuthentication() == null) {
+            final var userDetails = authUserDetailService.loadUserByUsername(userEmail);
 
-         if (jwtUtils.isTokenValid(jwtToken, userDetails)) {
-            final var securityContext = SecurityContextHolder.createEmptyContext();
-            final var authToken = new UsernamePasswordAuthenticationToken(
-                  userDetails, null, userDetails.getAuthorities()
-            );
+            if (!userDetails.isEnabled()) {
+                response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                response.setContentType("application/json");
+                response.getWriter().write("{\"statusCode\": 401, \"message\": \"USER_IS_DISABLED\"}");
+                response.getWriter().flush();
+                response.getWriter().close();
+                return;
+            }
 
-            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-            securityContext.setAuthentication(authToken);
+            if (jwtUtils.isTokenValid(jwtToken, userDetails)) {
+                final var securityContext = SecurityContextHolder.createEmptyContext();
+                final var authToken = new UsernamePasswordAuthenticationToken(
+                        userDetails, null, userDetails.getAuthorities()
+                );
 
-            SecurityContextHolder.setContext(securityContext);
-         }
-      }
+                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                securityContext.setAuthentication(authToken);
 
-      filterChain.doFilter(request, response);
-   }
+                SecurityContextHolder.setContext(securityContext);
+            }
+        }
+
+        filterChain.doFilter(request, response);
+    }
 }

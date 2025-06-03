@@ -13,6 +13,7 @@ import com.assessmint.be.global.exceptions.NotFoundException;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.DisabledException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -100,9 +101,13 @@ public class AuthService {
     }
 
     public LoginResponseDTO login(LoginRequestDTO requestDto) {
-        authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        requestDto.email().toLowerCase(), requestDto.password()));
+        try{
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            requestDto.email().toLowerCase(), requestDto.password()));
+        } catch (DisabledException e) {
+            throw new NotAuthorizedException("USER_IS_DISABLED");
+        }
 
         final var authUser = authUserService._getAuthUserByEmailNotDeleted(requestDto.email());
 

@@ -4,6 +4,7 @@ import com.assessmint.be.auth.entities.helpers.AuthRole;
 import com.assessmint.be.global.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.ColumnDefault;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -39,6 +40,10 @@ public class AuthUser extends Auditable implements UserDetails {
     @Column(name = "role")
     private Set<AuthRole> roles = new HashSet<>(Collections.singleton(AuthRole.USER));
 
+    @Builder.Default
+    @Column(nullable = false)
+    @ColumnDefault(value = "true")
+    private boolean isActive = true;
 
     @OneToMany
     private List<PasswordToken> passwordTokens;
@@ -89,6 +94,6 @@ public class AuthUser extends Auditable implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        return isActive;
     }
 }

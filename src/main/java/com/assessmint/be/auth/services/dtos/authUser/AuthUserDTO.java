@@ -11,7 +11,8 @@ public record AuthUserDTO(
         String email,
         String firstName,
         String lastName,
-        List<AuthRole> roles
+        List<AuthRole> roles,
+        boolean isActive
 ) {
     public static AuthUserDTO fromEntity(AuthUser authUser) {
         return new AuthUserDTO(
@@ -19,7 +20,8 @@ public record AuthUserDTO(
                 authUser.getEmail(),
                 authUser.getFirstName(),
                 authUser.getLastName(),
-                authUser.getRoles().stream().toList()
+                authUser.getRoles().stream().toList(),
+                authUser.isActive()
         );
     }
 }
