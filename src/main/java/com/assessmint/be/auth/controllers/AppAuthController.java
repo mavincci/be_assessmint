@@ -153,4 +153,15 @@ public class AppAuthController {
                 authUserService.getAllUsers()
         );
     }
+
+    @PostMapping("/toggle_active")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<APIResponse<AuthUserDTO>> toggleActive(
+            @Valid @RequestBody ToggleActiveDTO request) {
+        return APIResponse.build(
+                HttpStatus.OK.value(),
+                "USER_ACTIVE_TOGGLE_SUCCESS",
+                authUserService.toggleActive(request)
+        );
+    }
 }

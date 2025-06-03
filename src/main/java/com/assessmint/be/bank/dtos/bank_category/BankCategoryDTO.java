@@ -9,6 +9,7 @@ public record BankCategoryDTO(
         UUID id,
         String name,
         String description,
+        int bankCount,
         LocalDateTime createdAt
 ) {
     public static BankCategoryDTO fromEntity(BankCategory entity) {
@@ -16,6 +17,7 @@ public record BankCategoryDTO(
                 entity.getId(),
                 entity.getName(),
                 entity.getDescription(),
+                entity.getBanks().size(),
                 entity.getCreatedAt()
         );
     }
